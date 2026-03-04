@@ -5,7 +5,7 @@ Reusable toolkit of Claude Code agents, skills, and code style guides. Designed 
 ## Structure
 
 - `agents/` — 7 agents (code-reviewer, logic-review, session-reflector, atlassian-researcher, domain-reviewer, escalation-researcher, claude-optimiser)
-- `skills/` — 10 skills (git-commit, git-push, git-publish, mr-create, mr-review, reflect, jira-create, atlassian-research, escalation-research, postman-export)
+- `skills/` — 12 skills (git-commit, git-push, git-publish, git-rebase, mr-create, mr-review, ready-check, reflect, jira-create, atlassian-research, escalation-research, postman-export)
 - `guides/` — Code style guides (Angular 19, Python 3.10+) imported via `@guides/<name>.md`
 
 ## Conventions

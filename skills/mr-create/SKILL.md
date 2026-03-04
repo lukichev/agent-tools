@@ -14,6 +14,22 @@ Create a GitLab merge request for the current branch.
 
 ## Workflow
 
+### 1. Check for Existing MR
+
+Before creating, check if an MR already exists for the current branch:
+```bash
+glab mr list --source-branch "$(git branch --show-current)"
+```
+
+**If MR exists:**
+- Print the existing MR URL and title
+- Ask the user: "MR already exists. Do you want to update its description?"
+- If user says **no** → stop, do nothing further
+- If user says **yes** → generate new description content using the template, show it to the user for approval, then **append** it to the existing description (do NOT replace). Use `glab mr update` to update description only — **never overwrite the title**
+- **Never replace the MR description or title completely** — always append new content below the existing description, separated by a horizontal rule (`---`)
+
+### 2. Create New MR (only if no existing MR)
+
 1. Gather information via `AskUserQuestion`:
    - **Ticket ID** (detect from branch name, or ask) — optional
    - **Testing details** for MR description
@@ -53,6 +69,9 @@ Use the template from `mr-template.md` in this skill folder:
 - Always show MR description to user before creating
 - Target branch is `main` unless user specifies otherwise
 - Always set `--remove-source-branch`
+- **Never replace an existing MR's title**
+- **Never replace an existing MR's description** — only append below a `---` separator
+- Only update an existing MR's description when the user explicitly asks for it
 
 ## glab Reference
 
@@ -60,11 +79,23 @@ Use the template from `mr-template.md` in this skill folder:
 # Create MR
 glab mr create --title "..." --description "..." --target-branch main
 
-# Update existing MR
-glab mr update <MR-NUMBER> --title "..." --description "..."
+# Check if MR exists for current branch
+glab mr list --source-branch "$(git branch --show-current)"
 
-# List MRs for branch
-glab mr list --source-branch TICKET-ID
+# View existing MR (to read current description before appending)
+glab mr view <MR-NUMBER> --output json
+
+# Update existing MR description (append only — never replace)
+# 1. Read existing description first
+# 2. Append new content below a --- separator
+glab mr update <MR-NUMBER> --description "$(cat <<'EOF'
+[existing description]
+
+---
+
+[new content]
+EOF
+)"
 
 # View MR
 glab mr view <MR-NUMBER>

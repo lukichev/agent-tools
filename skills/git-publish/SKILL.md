@@ -27,12 +27,13 @@ Stage files and create a conventional commit. See `/git-commit` for format rules
 
 Push the branch to remote. Creates a feature branch from main if needed. See `/git-push` for rules.
 
-### 4. Create MR (`/mr-create`)
+### 4. Create or Update MR (`/mr-create`)
 
-Create a GitLab merge request with description. Optionally fetches Jira ticket details. See `/mr-create` for template and rules.
+Check if an MR already exists for the current branch. If it does, skip MR creation — only offer to update the MR description if the user explicitly requests it. See `/mr-create` for rules.
 
-## Example Flow
+## Example Flows
 
+### New MR
 ```
 User: /git-publish
 
@@ -53,4 +54,23 @@ Agent: Staging files...
 
        MR created: https://gitlab.com/your-org/your-project/-/merge_requests/123
        Title: fix(auth): handle session expiry race condition, PROJ-1234
+```
+
+### Existing MR
+```
+User: /git-publish
+
+Agent: Staging files...
+       Committing: fix(auth): add retry logic for token refresh, PROJ-1234
+       Pushing to origin/PROJ-1234...
+
+       MR !123 already exists for this branch:
+       "fix(auth): handle session expiry race condition, PROJ-1234"
+       https://gitlab.com/your-org/your-project/-/merge_requests/123
+
+       Do you want to update the MR description?
+
+User: No
+
+Agent: Done. Changes pushed to origin/PROJ-1234.
 ```

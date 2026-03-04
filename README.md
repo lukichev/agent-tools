@@ -48,6 +48,8 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 | `/git-commit` | Stage files and create a conventional commit |
 | `/git-push` | Push branch to remote (creates feature branch from main if needed) |
 | `/git-publish` | End-to-end: orchestrates `/git-commit` → `/git-push` → `/mr-create` |
+| `/git-rebase` | Rebase current branch onto main (or another target), handles squash-merged parents |
+| `/ready-check` | Pre-publish gate — AC completeness, debug artifact scan, code review |
 | `/mr-create` | Create GitLab MR with description (`glab`) |
 | `/mr-review` | Load and review a GitLab MR with comments |
 | `/jira-create` | Create Jira tickets with standard format |
@@ -61,6 +63,10 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 |-------|-------------|
 | Angular 19 | `@guides/angular.md` |
 | Python 3.10+ | `@guides/python.md` |
+
+## Helpful Links
+
+- [component.gallery](https://component.gallery/) — catalog of UI components across design systems
 
 ## Requirements
 
