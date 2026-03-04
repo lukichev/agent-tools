@@ -20,19 +20,25 @@ Run through ALL applicable sections. Read the relevant files first, then report 
 Read: `CLAUDE.md` at project root, `~/.claude/CLAUDE.md` (global), and any nested/parent CLAUDE.md files. Also check for `CLAUDE.local.md` (gitignored personal overrides).
 
 **Check for:**
-- [ ] Size: 50-150 lines ideal. Over 200 = too much. "If your CLAUDE.md is too long, Claude ignores half of it because important rules get lost in the noise."
+- [ ] **Tiered context architecture** — CLAUDE.md should follow a 3-tier approach:
+  - **Tier 1 (always loaded, first 200 lines):** project name, critical rules, quick-start commands, troubleshooting table. Target: <800 tokens.
+  - **Tier 2 (on demand):** component-specific docs, API references, deployment guides. Linked from CLAUDE.md via `docs/` or `@import`. Target: 500–1,500 tokens per doc.
+  - **Tier 3 (never loaded):** complete API specs, changelogs, generated docs. Referenced by path only.
+- [ ] Size: first 200 lines should contain all critical info. Over 200 lines = detail should be extracted to linked docs. Estimate: `wc -w CLAUDE.md | awk '{print $1 * 0.75}'` for rough token count.
 - [ ] Litmus test each line: "Would Claude make a mistake without this?" If no → cut.
 - [ ] Redundancy with MEMORY.md or agent memory files.
 - [ ] Information that exists in code docstrings (don't duplicate).
-- [ ] Verbose prose → compress to tables or bullet lists.
+- [ ] Verbose prose → compress to tables or bullet lists. A 500-word architecture section can often become 15 words + a link to `docs/ARCHITECTURE.md`.
 - [ ] Filler phrases: "Please note that", "It's important to", "Make sure to" → remove.
 - [ ] Stale content: references to deleted files, old decisions, deprecated features.
 - [ ] Missing critical info: build commands, test commands, key constraints.
-- [ ] Front-loading: most important rules first, not buried.
+- [ ] Front-loading: most important rules first (critical rules, quick-start), not buried after architecture docs.
 - [ ] `@import` usage: check if CLAUDE.md uses `@path/to/file` syntax to import other files. Recommend this for long CLAUDE.md files to keep the root file slim while referencing detail docs.
 - [ ] Content that belongs in skills: domain knowledge or workflows only relevant sometimes should be in `.claude/skills/`, not CLAUDE.md. CLAUDE.md is loaded EVERY session — skills load on demand.
 - [ ] Rules that should be hooks: if an instruction says "always run X after Y" — that's a hook, not a CLAUDE.md line. Hooks are deterministic; CLAUDE.md is advisory.
 - [ ] Compaction instructions: if the project has long sessions, CLAUDE.md should include compact guidance like "When compacting, preserve the full list of modified files."
+- [ ] **Quick reference card**: recommend creating a `docs/QUICK_REF.md` with top 10 commands, top 5 troubleshooting fixes, and critical rules. One-page cheat sheet Claude can read on demand instead of loading everything into CLAUDE.md.
+- [ ] **Docs navigation hub**: for larger projects, recommend a `docs/INDEX.md` that maps tasks to docs ("I want to work on the API → docs/API.md").
 
 ---
 
@@ -63,9 +69,9 @@ Read: All `.claude/agents/*.md` files.
 
 | Model | Use When |
 |---|---|
-| `opus` | Deep reasoning, complex domain expertise, high cost of subtle errors, infrequent use |
-| `sonnet` | Standard dev work (reviews, features, bugs), frequent use, 90% of opus quality suffices |
-| `haiku` | Simple text transforms, search aggregation, no complex logic needed |
+| `opus` | Professional software engineering, advanced agents, multi-hour research, complex reasoning where subtle errors are costly. Best for coding, enterprise agents, and professional work. Infrequent, high-stakes use. |
+| `sonnet` | Frontier intelligence at scale — code generation, data analysis, agentic tool use, visual understanding. Standard dev work (reviews, features, bugs). Frequent use, best balance of quality and cost. |
+| `haiku` | Near-frontier speed at the most economical price. Real-time applications, high-volume processing, sub-agent tasks, search aggregation. Use when strong reasoning is needed but latency and cost matter most. |
 
 **Heuristic**: "If this agent makes a subtle reasoning error, what's the blast radius?" High → opus. Medium → sonnet. Low/none → haiku.
 
@@ -112,6 +118,7 @@ Read: `.claude/settings.json` and `.claude/settings.local.json` — look for `ho
 **Check for:**
 - [ ] CLAUDE.md rules that should be hooks instead. Hooks = deterministic (guaranteed execution). CLAUDE.md = advisory (Claude may ignore under context pressure). Rule of thumb: "Must happen every time with zero exceptions" → hook.
 - [ ] Common hook opportunities:
+  - **Session-start hook** for smart context: show project status (DB running, current branch, environment) and detect work context from recent changes to hint at relevant docs
   - Run linter/formatter after file edits
   - Block writes to protected directories (e.g., migrations, generated code)
   - Run type checker after code changes
@@ -183,6 +190,12 @@ What should be added, converted, or moved.
 
 ## Token Impact Estimate
 Estimated overhead vs. potential savings.
+
+## Measurement Targets
+| Metric | How to Check | Target |
+|--------|-------------|--------|
+| CLAUDE.md token budget | `head -200 CLAUDE.md \| wc -w \| awk '{print $1 * 0.75}'` | < 1,000 tokens in first 200 lines |
+| Session-start hook time | `time .claude/hooks/session-start.sh` | < 2 seconds |
 ```
 
 ## Rules

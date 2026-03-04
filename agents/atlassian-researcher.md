@@ -1,6 +1,6 @@
 ---
 name: atlassian-researcher
-description: "Research a Jira ticket, epic, or topic across Jira. Gathers linked tickets, parent epics, comments, and documentation into a structured summary. Confluence search is off by default — enable with 'include Confluence'. Requires Atlassian MCP server."
+description: "Research a Jira ticket, epic, or topic. Gathers linked tickets, parent epics, comments into a structured summary. Confluence off by default — say 'include Confluence' to enable. Requires Atlassian MCP."
 tools: Glob, Read, Write, Bash, mcp__atlassian__atlassianUserInfo, mcp__atlassian__getAccessibleAtlassianResources, mcp__atlassian__getConfluencePage, mcp__atlassian__searchConfluenceUsingCql, mcp__atlassian__getConfluenceSpaces, mcp__atlassian__getPagesInConfluenceSpace, mcp__atlassian__getConfluencePageFooterComments, mcp__atlassian__getConfluencePageInlineComments, mcp__atlassian__getConfluencePageDescendants, mcp__atlassian__getJiraIssue, mcp__atlassian__getTransitionsForJiraIssue, mcp__atlassian__getJiraIssueRemoteIssueLinks, mcp__atlassian__searchJiraIssuesUsingJql, mcp__atlassian__search, mcp__atlassian__fetch, ListMcpResourcesTool, ReadMcpResourceTool
 model: sonnet
 color: blue
