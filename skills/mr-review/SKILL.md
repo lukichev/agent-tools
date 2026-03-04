@@ -1,6 +1,6 @@
 ---
 name: mr-review
-description: Load a GitLab MR by number and display all comments, discussions, and code review feedback.
+description: Load a GitLab MR by number and display all comments, discussions, and code review feedback. Use when the user wants to review an MR, check MR comments, see review feedback, or says "review MR !123".
 argument-hint: "<MR number>"
 ---
 
@@ -14,7 +14,7 @@ Fetch a GitLab merge request, display all comments/discussions, and provide code
 
 ## Workflow
 
-1. Parse MR number from input
+1. Parse MR number from `$ARGUMENTS`
 2. Fetch MR details (title, description, status)
 3. Fetch all discussions and comments
 4. Fetch the actual diff

@@ -2,6 +2,7 @@
 name: mr-create
 description: Create a GitLab merge request for the current branch using glab CLI. Optionally fetches Jira ticket details for the MR description.
 argument-hint: "<ticket ID (optional)>"
+disable-model-invocation: true
 ---
 
 # MR Create

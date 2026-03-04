@@ -1,6 +1,6 @@
 ---
 name: ready-check
-description: Pre-publish gate — fetches ticket ACs, checks implementation completeness, scans for debug artifacts, then runs a code review. Use before /git-publish.
+description: Pre-publish gate — fetches ticket ACs, checks implementation completeness, scans for debug artifacts, then runs a code review. Use before /git-publish. Use when the user wants to check if their work is ready, says "am I done?", "is this ready?", or "check before publishing".
 argument-hint: "<ticket ID, e.g. PROJ-1234>"
 ---
 

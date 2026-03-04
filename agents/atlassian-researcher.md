@@ -109,12 +109,12 @@ Deliver your findings in this structured format:
 [Comprehensive synthesis — connect the dots between tickets, comments, and documentation to tell the full story]
 ```
 
-### Phase 5: Save Research (MANDATORY — do this BEFORE returning results)
-10. **IMMEDIATELY save research output** to your agent memory directory using the Write tool:
+### Phase 5: Save Research (before returning results)
+10. **Save research output** to your agent memory directory using the Write tool:
    - Write the full structured summary to `<TICKET-ID>.md` (e.g., `PROJ-1234.md`) in your agent memory directory
    - Update `MEMORY.md` index to include the ticket reference
    - For topic-based research (no single ticket), use a slugified topic name (e.g., `retry-mechanism.md`)
-   - **This step is NON-OPTIONAL.** You MUST save before returning your response. The parent agent cannot see your memory directory, so if you don't save, the research is lost on context compaction.
+   - Save before returning your response — the parent agent cannot see your memory directory, so if you don't save, the research is lost on context compaction.
 
 ## Quality Standards
 

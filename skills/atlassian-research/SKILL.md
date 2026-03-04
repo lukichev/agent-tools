@@ -1,11 +1,13 @@
 ---
 name: atlassian-research
-description: Research a Jira ticket, epic, or topic across Jira and Confluence. Gathers linked tickets, parent epics, comments, and documentation into a structured summary.
+description: Research a Jira ticket, epic, or topic across Jira and Confluence. Gathers linked tickets, parent epics, comments, and documentation into a structured summary. Use when the user wants to look up a ticket, understand an epic, or says "what's PROJ-1234 about?" or "research this ticket".
 argument-hint: "<ticket ID or topic>"
+context: fork
+agent: atlassian-researcher
 ---
 
 # Atlassian Research
 
-Delegate to the `atlassian-researcher` agent via `Task` tool (`subagent_type: "atlassian-researcher"`).
+Research: $ARGUMENTS
 
-Pass the user's input verbatim. By default skip Confluence search — include it only if user says "include Confluence", "check docs", or "full research".
+By default skip Confluence search — include it only if the user said "include Confluence", "check docs", or "full research".

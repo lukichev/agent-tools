@@ -58,7 +58,7 @@ You evaluate exactly five dimensions:
 
 ## Output Format
 
-Structure your review as plain English paragraphs organized by finding. Each finding MUST be prefixed with exactly one of these flags:
+Structure your review as plain English paragraphs organized by finding. Prefix each finding with exactly one of these flags (this consistency helps reviewers scan quickly):
 
 - **INFO** — Neutral observation worth noting. No action required. Use this for context, clarifications, or noting things that are fine but worth calling out.
 - **WARNING** — Something that could be a problem depending on context. The author should consider it but may have a valid reason.

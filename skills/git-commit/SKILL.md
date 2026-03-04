@@ -2,6 +2,7 @@
 name: git-commit
 description: Stage files and create a conventional commit. Analyzes the diff, detects ticket ID from branch name, and generates a properly formatted commit message.
 argument-hint: "<commit type override (optional)>"
+disable-model-invocation: true
 ---
 
 # Git Commit
@@ -38,7 +39,7 @@ type(scope): description, TICKET-ID
 - Include ticket ID when available; omit if no ticket exists yet
 - Body is optional but helpful for non-obvious changes — explains "why", not "what"
 - No signature block
-- NEVER add "Co-Authored-By" lines
+- Do not add "Co-Authored-By" lines — the project's commit hooks or CI handle attribution
 
 ## Types & Examples
 

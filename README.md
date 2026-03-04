@@ -57,6 +57,7 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 | `/atlassian-research` | Research Jira tickets/topics via atlassian-researcher agent |
 | `/postman-export` | Generate Postman collection JSON from API endpoints on current branch |
 | `/escalation-research` | Deep investigation of escalation/issue tickets |
+| `/skill-creator` | Create new skills or improve existing ones |
 
 ## Code Style Guides
 
