@@ -4,7 +4,7 @@ description: End-to-end publish flow — commit, push, and create GitLab MR in o
 argument-hint: "<commit type (optional)>"
 ---
 
-# Publish
+# Git Publish
 
 Orchestrates the full publish flow: commit changes → push to remote → create merge request.
 

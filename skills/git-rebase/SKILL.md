@@ -1,9 +1,10 @@
 ---
 name: git-rebase
 description: Rebase current branch onto main (or another target). Handles squash-merged parent branches automatically.
+argument-hint: "<target branch (default: main)>"
 ---
 
-# Rebase
+# Git Rebase
 
 Rebase the current feature branch onto `main` (or a specified target branch). Detects and handles the squash-merge scenario where a parent branch was squash-merged into the target.
 

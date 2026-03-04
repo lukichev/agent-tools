@@ -1,7 +1,7 @@
 ---
 name: escalation-researcher
 description: "Deep investigation of escalation or complex issue tickets. Gathers full context, finds similar historical tickets, checks recent releases for regressions, and surfaces investigation recommendations.\n\nExamples:\n\n- User: \"Research this escalation: PROJ-1234\"\n  Assistant: \"I'll use the escalation-researcher agent to investigate.\"\n\n- User: \"What do we know about this customer issue?\"\n  Assistant: \"I'll use the escalation-researcher agent to gather context and find related tickets.\""
-tools: Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool
+tools: Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool, Write, Edit, mcp__atlassian__atlassianUserInfo, mcp__atlassian__getAccessibleAtlassianResources, mcp__atlassian__getConfluencePage, mcp__atlassian__searchConfluenceUsingCql, mcp__atlassian__getConfluenceSpaces, mcp__atlassian__getPagesInConfluenceSpace, mcp__atlassian__getConfluencePageFooterComments, mcp__atlassian__getConfluencePageInlineComments, mcp__atlassian__getConfluencePageDescendants, mcp__atlassian__getJiraIssue, mcp__atlassian__getTransitionsForJiraIssue, mcp__atlassian__getJiraIssueRemoteIssueLinks, mcp__atlassian__searchJiraIssuesUsingJql, mcp__atlassian__search, mcp__atlassian__fetch
 model: opus
 color: red
 memory: project

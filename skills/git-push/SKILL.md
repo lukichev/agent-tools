@@ -1,9 +1,10 @@
 ---
 name: git-push
 description: Push the current branch to remote. Creates a feature branch from main first if currently on main/master.
+argument-hint: "<branch name (optional)>"
 ---
 
-# Push
+# Git Push
 
 Push the current branch to the remote. If on main/master, create a feature branch first.
 

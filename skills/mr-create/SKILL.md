@@ -4,7 +4,7 @@ description: Create a GitLab merge request for the current branch using glab CLI
 argument-hint: "<ticket ID (optional)>"
 ---
 
-# Create MR
+# MR Create
 
 Create a GitLab merge request for the current branch.
 
@@ -77,7 +77,7 @@ Use the template from `mr-template.md` in this skill folder:
 
 ```bash
 # Create MR
-glab mr create --title "..." --description "..." --target-branch main
+glab mr create --title "..." --description "..." --target-branch main --remove-source-branch
 
 # Check if MR exists for current branch
 glab mr list --source-branch "$(git branch --show-current)"

@@ -1,12 +1,12 @@
 ---
 name: ready-check
-description: Pre-publish gate — fetches ticket ACs, checks implementation completeness, scans for debug artifacts, then runs a code review. Use before /publish.
+description: Pre-publish gate — fetches ticket ACs, checks implementation completeness, scans for debug artifacts, then runs a code review. Use before /git-publish.
 argument-hint: "<ticket ID, e.g. PROJ-1234>"
 ---
 
 # Ready Check
 
-Pre-publish gate that verifies the implementation is complete and clean before running `/publish`.
+Pre-publish gate that verifies the implementation is complete and clean before running `/git-publish`.
 
 ## Workflow
 
@@ -95,7 +95,7 @@ AC Completeness:  ✅ 3/3 done
 Debug Artifacts:  ✅ Clean
 Code Review:      ✅ No blockers / ⚠️ N suggestions
 
-→ Ready to /publish  OR  → Fix the above before publishing
+→ Ready to /git-publish  OR  → Fix the above before publishing
 ```
 
 ## Rules
@@ -104,3 +104,4 @@ Code Review:      ✅ No blockers / ⚠️ N suggestions
 - Don't run code review if ACs have ❌ items (no point reviewing incomplete work)
 - Keep the summary tight — details are in the sections above it
 - If no ticket ID can be found, skip steps 3–4 and note it in the summary
+- If Atlassian MCP is not configured, skip steps 3–4 and note it in the summary

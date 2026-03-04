@@ -52,6 +52,7 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 | `/ready-check` | Pre-publish gate — AC completeness, debug artifact scan, code review |
 | `/mr-create` | Create GitLab MR with description (`glab`) |
 | `/mr-review` | Load and review a GitLab MR with comments |
+| `/mr-comment` | Post numbered review suggestions as inline diff comments on a GitLab MR |
 | `/jira-create` | Create Jira tickets with standard format |
 | `/atlassian-research` | Research Jira tickets/topics via atlassian-researcher agent |
 | `/postman-export` | Generate Postman collection JSON from API endpoints on current branch |

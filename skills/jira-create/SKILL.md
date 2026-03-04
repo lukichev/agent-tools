@@ -44,7 +44,7 @@ Use the template from `ticket-template.md` in this skill folder:
 | `{{AC_DETAIL}}` | Sub-detail if needed |
 | `{{ROOT_CAUSE}}` | Why the bug exists |
 | `{{SOLUTION}}` | Brief description of the fix |
-| `{{SENTRY_ID}}` | Error tracking issue ID (optional) |
+| Error tracking ID | Mention in Dev Notes if available (e.g., Sentry issue ID) |
 
 ## QA Section (Optional)
 
@@ -55,7 +55,7 @@ For UI/frontend changes, add a **QA — Affected Pages** section listing all pag
 - Always show full ticket text to user before creating
 - Wait for explicit approval
 - Return the created ticket ID (e.g., PROJ-1234)
-- If an MR already exists for the changes, update MR title and description with the new ticket ID using `glab mr update <MR-NUMBER> --title "..." --description "..."`
+- If an MR already exists for the changes, append the new ticket ID to the MR description (never replace the title or description — see `/mr-create` rules)
 
 ## Related Skills
 

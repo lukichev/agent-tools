@@ -2,7 +2,6 @@
 name: mr-review
 description: Load a GitLab MR by number and display all comments, discussions, and code review feedback.
 argument-hint: "<MR number>"
-tools: Bash, Read, Grep, Glob
 ---
 
 # MR Review
@@ -118,7 +117,7 @@ Never report findings based solely on the diff — always verify against actual 
 
 ```bash
 # Get MR source branch
-glab mr view <MR_NUMBER> --output json | python3 -c "import json,sys; mr=json.load(sys.stdin); print(mr['source_branch'])"
+glab mr view <MR_NUMBER> --output json | jq -r '.source_branch'
 
 # Check current branch
 git branch --show-current
@@ -152,61 +151,9 @@ For every potential finding:
 - Look for related tests that cover the case
 - Drop the finding if context proves it's a false positive
 
-## Posting Inline Comments to MR
-
-To post review comments as inline diff threads (appearing next to specific lines in the MR diff), use `curl` with the GitLab Discussions API. **Do NOT use `glab api -f` for this** — the `-f` form fields don't properly nest the `position` object, resulting in general MR comments instead of inline ones.
-
-### Get MR diff refs first
-
-```bash
-glab api "projects/<URL-encoded-project>/merge_requests/<MR_IID>" | python3 -c "
-import json, sys
-mr = json.load(sys.stdin)
-print(json.dumps(mr['diff_refs'], indent=2))
-"
-```
-
-### Post inline comment via curl
-
-```bash
-curl -s --request POST \
-  --header "PRIVATE-TOKEN: <token>" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "body": "Comment text here (supports markdown)",
-    "position": {
-      "base_sha": "<from diff_refs.base_sha>",
-      "start_sha": "<from diff_refs.start_sha>",
-      "head_sha": "<from diff_refs.head_sha>",
-      "position_type": "text",
-      "old_path": "<file path>",
-      "new_path": "<file path>",
-      "old_line": null,
-      "new_line": <line number in new file>
-    }
-  }' \
-  "https://gitlab.com/api/v4/projects/<URL-encoded-project>/merge_requests/<MR_IID>/discussions"
-```
-
-### Key rules
-
-- **New files**: set `old_line: null`, only set `new_line`
-- **Modified files (commenting on added line)**: set `old_line: null`, set `new_line` to the line in the new version
-- **Modified files (commenting on existing/removed line)**: set `old_line` to line in old version, `new_line: null`
-- **Both old_path and new_path** must always be provided (same value for non-renamed files)
-- The response `notes[0].type` should be `"DiffNote"` — if it's `null`, the comment was posted as a general comment (wrong)
-- Get the git token from the remote URL: `git remote get-url origin`
-
 ## Posting Comments
 
-**Never post comments to the MR automatically.** After presenting the review:
-
-1. Number each suggestion (e.g., `[1]`, `[2]`, `[3]`)
-2. Wait for the user to tell you which ones to post (e.g., "post 1, 3, 5" or "post all" or "post the security ones")
-3. Only post the comments the user explicitly selected — nothing else
-4. After posting, confirm which comments were posted with their line references
-
-If the user doesn't ask to post anything, don't post anything. The review output alone is valuable.
+After presenting the review, number each suggestion (e.g., `[1]`, `[2]`, `[3]`). If the user wants to post them to GitLab, use `/mr-comment`.
 
 ## Important
 

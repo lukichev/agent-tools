@@ -4,7 +4,7 @@ description: Stage files and create a conventional commit. Analyzes the diff, de
 argument-hint: "<commit type override (optional)>"
 ---
 
-# Commit
+# Git Commit
 
 Stage changed files and create a commit with a conventional commit message.
 
