@@ -1,13 +1,13 @@
 ---
 name: git-rebase
-description: Rebase current branch onto main (or another target). Handles squash-merged parent branches automatically.
+description: Rebase current branch onto its MR target branch (auto-detected) or main. Handles squash-merged parent branches automatically.
 argument-hint: "<target branch (default: main)>"
 disable-model-invocation: true
 ---
 
 # Git Rebase
 
-Rebase the current feature branch onto `main` (or a specified target branch). Detects and handles the squash-merge scenario where a parent branch was squash-merged into the target.
+Rebase the current feature branch onto its source branch. Auto-detects the target from the existing MR, falls back to `main`. Detects and handles the squash-merge scenario where a parent branch was squash-merged into the target.
 
 ## Workflow
 
@@ -26,16 +26,30 @@ git branch --show-current
 git stash push -m "pre-rebase-$(date +%s)"
 ```
 
-### 2. Fetch and Analyse
+### 2. Determine Target Branch
+
+If the user specified a target branch explicitly, use that. Otherwise, auto-detect:
 
 ```bash
-git fetch origin <target>          # default: main
+# Check if an MR exists for the current branch and get its target
+glab mr list --source-branch <current-branch> --json targetBranch -q '.[] | .targetBranch' 2>/dev/null
+```
+
+- If an MR exists, use its `targetBranch` as the rebase target.
+- If no MR exists or the command fails, fall back to `main`.
+
+Tell the user which target branch was detected and why.
+
+### 3. Fetch and Analyse
+
+```bash
+git fetch origin <target>
 git log --oneline origin/<target>..HEAD
 ```
 
 Look at the commit list. Determine whether all commits belong to the current branch or if there are commits from a **parent branch** (different ticket ID or scope).
 
-### 3. Choose Strategy
+### 4. Choose Strategy
 
 **Simple case** — all commits belong to the current branch:
 
@@ -58,7 +72,7 @@ This replays only the current branch's commits onto the target, skipping the par
 - A plain `git rebase origin/<target>` fails with many conflicts on commits that aren't ours
 - The parent branch no longer exists on the remote (`git ls-remote origin <parent-branch>` returns nothing)
 
-### 4. Handle Conflicts
+### 5. Handle Conflicts
 
 If conflicts occur during rebase:
 - Read the conflicted files
@@ -66,7 +80,7 @@ If conflicts occur during rebase:
 - `git add <resolved-files>` then `git rebase --continue`
 - If the rebase is hopeless, `git rebase --abort` and inform the user
 
-### 5. Verify and Push
+### 6. Verify and Push
 
 ```bash
 # Verify only our commits remain
@@ -76,7 +90,7 @@ git log --oneline origin/<target>..HEAD
 git push --force-with-lease origin <current-branch>
 ```
 
-### 6. Update MR Target (if needed)
+### 7. Update MR Target (if needed)
 
 If an MR exists and its target branch differs from the rebase target:
 
@@ -88,9 +102,12 @@ glab mr update <MR-NUMBER> --target-branch <target>
 ## Parameters
 
 The user may optionally specify:
-- **Target branch** — defaults to `main`. Example: `/git-rebase feature/base` rebases onto `feature/base`.
+- **Target branch** — Example: `/git-rebase feature/base` rebases onto `feature/base`.
 
-Detect the target from the argument. If no argument, use `main`.
+Priority for determining the target branch:
+1. Explicit argument from the user (highest priority)
+2. Target branch of an existing MR for the current branch
+3. Fall back to `main`
 
 ## Error Recovery
 
