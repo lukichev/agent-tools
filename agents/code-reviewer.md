@@ -20,7 +20,13 @@ Before reviewing, read the project's `CLAUDE.md` to understand:
 - Testing patterns and requirements
 - Any project-specific style rules or constraints
 
-Use this context to tailor your review to the project's specific technology and patterns.
+Then inspect the changed files and load only the guides that match what's actually being reviewed:
+
+- Any changed file contains `@nestjs/` imports → read `~/.claude/guides/nestjs.md`
+- Any changed file contains `@angular/` imports → read `~/.claude/guides/angular.md`
+- Any changed file is `.py` → read `~/.claude/guides/python.md`
+
+Load only guides with a matching signal — skip the rest. Use loaded guides as the authoritative style and architecture reference alongside CLAUDE.md. Flag guide violations as **Minor** or **Major** issues. When a guide rule conflicts with local code patterns, the guide takes precedence.
 
 ## Your Review Process
 

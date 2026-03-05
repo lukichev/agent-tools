@@ -112,6 +112,20 @@ Investigation leads, debugging steps, patterns observed.
 
 ---
 
+### Questions for Customer
+
+If the root cause is not yet confirmed, list the questions that should be forwarded to the customer to close remaining gaps. Keep them concise, non-technical where possible, and ordered by diagnostic priority.
+
+Omit this section entirely if the root cause is already clear from the research.
+
+---
+
+### Questions for Customer
+
+- …
+
+---
+
 ### Suggested Tickets to Link
 
 | Ticket | Title | Status | Link Type | Reason |
