@@ -4,3 +4,4 @@
 *.pem
 credentials.*
 .DS_Store
+.claude/
