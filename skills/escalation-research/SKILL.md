@@ -9,5 +9,6 @@ agent: escalation-researcher
 # Escalation Research
 
 Investigate: $ARGUMENTS
+Research date: !`date +%Y-%m-%d`
 
 Run a multi-phase investigation: gather ticket context, search historical tickets, check recent releases, optionally search codebase, and produce a structured report with recommendations and tickets to link.

@@ -2,7 +2,6 @@
 name: git-push
 description: Push the current branch to remote. Creates a feature branch from main first if currently on main/master.
 argument-hint: "<branch name (optional)>"
-disable-model-invocation: true
 ---
 
 # Git Push

@@ -2,7 +2,6 @@
 name: git-commit
 description: Stage files and create a conventional commit. Analyzes the diff, detects ticket ID from branch name, and generates a properly formatted commit message.
 argument-hint: "<commit type override (optional)>"
-disable-model-invocation: true
 ---
 
 # Git Commit

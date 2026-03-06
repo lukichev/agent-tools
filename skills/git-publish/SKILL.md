@@ -2,14 +2,18 @@
 name: git-publish
 description: End-to-end publish flow — commit, push, and create GitLab MR in one command. Orchestrates /git-commit, /git-push, and /mr-create skills.
 argument-hint: "<commit type (optional)>"
-disable-model-invocation: true
 ---
 
 # Git Publish
 
 Orchestrates the full publish flow: commit changes → push to remote → create merge request.
 
-Delegates to `/git-commit`, `/git-push`, and `/mr-create` for each step — do not duplicate their instructions here.
+**CRITICAL:** Before each step, you MUST read the corresponding skill file and follow its instructions exactly:
+- `/git-commit` → `~/.claude/skills/git-commit/SKILL.md`
+- `/git-push` → `~/.claude/skills/git-push/SKILL.md`
+- `/mr-create` → `~/.claude/skills/mr-create/SKILL.md`
+
+Do not improvise or skip rules from these skills. Read each file before executing that step.
 
 ## Workflow
 

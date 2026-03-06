@@ -2,7 +2,6 @@
 name: git-rebase
 description: Rebase current branch onto its MR target branch (auto-detected) or main. Handles squash-merged parent branches automatically.
 argument-hint: "<target branch (default: main)>"
-disable-model-invocation: true
 ---
 
 # Git Rebase

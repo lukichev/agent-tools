@@ -2,7 +2,6 @@
 name: mr-create
 description: Create a GitLab merge request for the current branch using glab CLI. Optionally fetches Jira ticket details for the MR description.
 argument-hint: "<ticket ID (optional)>"
-disable-model-invocation: true
 ---
 
 # MR Create
@@ -62,7 +61,25 @@ Use the template from `mr-template.md` in this skill folder:
 | `{{TICKET_ID}}` | Ticket ID (e.g., PROJ-1234) — omit section if no ticket |
 | `{{SUMMARY}}` | 1-2 sentences: what was addressed |
 | `{{DETAILS}}` | Explain the changes and why |
-| `{{TESTING}}` | How the changes were verified |
+| `{{TESTING}}` | What the developer did to verify the changes (not a QA checklist) |
+
+### 3. Post-MR Slack Message
+
+After successfully creating a new MR **or** finding an existing one (skip only if the user cancels entirely):
+
+1. Build a Slack-ready message in this format:
+   ```
+   type(scope): short description, https://documo.atlassian.net/browse/TICKET-ID
+   https://gitlab.com/documo/documo-server/-/merge_requests/NUMBER
+   ```
+2. First line: the commit message subject (without the ticket ID suffix) + Jira browse link
+   - If no ticket ID is available, omit the Jira link (just the commit subject)
+3. Second line: the MR URL
+4. Copy the message to the clipboard:
+   ```bash
+   printf '%s' "<message>" | pbcopy
+   ```
+5. Display the copied message in the output so the user can see what was copied
 
 ## Rules
 
@@ -73,6 +90,7 @@ Use the template from `mr-template.md` in this skill folder:
 - **Never replace an existing MR's title**
 - **Never replace an existing MR's description** — only append below a `---` separator
 - Only update an existing MR's description when the user explicitly asks for it
+- **Never use checkboxes** (`- [ ]`) in the Testing section — use plain bullet points instead
 
 ## glab Reference
 

@@ -2,7 +2,6 @@
 name: git-start
 description: Start work on a new feature or ticket by creating a branch from the latest main. Takes a Jira ticket number (e.g. DOC-1020) or a feature name as the argument. Fetches and updates main before branching. If a Jira ticket number is provided, researches the ticket and enters plan mode. Use when the user says "start on DOC-1020", "let's work on ticket X", "create a branch for...", "begin feature Y", or "start a new branch".
 argument-hint: "<TICKET-123 or feature-name>"
-disable-model-invocation: true
 ---
 
 # git-start

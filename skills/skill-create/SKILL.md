@@ -1,8 +1,7 @@
 ---
-name: skill-creator
+name: skill-create
 description: Create new skills, modify and improve existing skills. Use when users want to create a skill from scratch, turn a workflow into a reusable skill, update or optimize an existing skill, or improve a skill's description for better triggering accuracy. Also use when the user says "turn this into a skill", "make a skill for X", or "improve this skill".
 argument-hint: "<skill name or description of what it should do>"
-disable-model-invocation: true
 ---
 
 # Skill Creator
@@ -44,7 +43,7 @@ skill-name/
 name: skill-name
 description: What it does and when to trigger. Be specific and slightly "pushy".
 argument-hint: "<what the user passes>"
-disable-model-invocation: true   # only user can invoke (for side-effect skills)
+disable-model-invocation: false  # set true to prevent Claude from auto-triggering
 user-invocable: false            # only Claude can invoke (for background knowledge)
 allowed-tools: Read, Grep, Glob  # restrict tools when skill is active
 context: fork                    # run in isolated subagent
@@ -59,7 +58,7 @@ Only `description` is recommended. All other fields are optional.
 | `name` | Display name and `/slash-command`. Lowercase, hyphens, max 64 chars |
 | `description` | What + when. Claude uses this to decide when to auto-load |
 | `argument-hint` | Shown during autocomplete (e.g., `<MR number>`) |
-| `disable-model-invocation` | Prevent Claude from auto-triggering. Use for skills with side effects (commit, push, deploy) |
+| `disable-model-invocation` | Set `true` to prevent Claude from auto-triggering. Default: `false` |
 | `user-invocable` | Set `false` to hide from `/` menu. Use for background knowledge |
 | `allowed-tools` | Restrict which tools Claude can use |
 | `context` | `fork` to run in isolated subagent context |

@@ -2,7 +2,6 @@
 name: mr-review
 description: Load a GitLab MR by number and display all comments, discussions, and code review feedback. Use when the user wants to review an MR, check MR comments, see review feedback, or says "review MR !123".
 argument-hint: "<MR number>"
-disable-model-invocation: true
 ---
 
 # MR Review

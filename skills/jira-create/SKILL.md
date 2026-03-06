@@ -2,7 +2,6 @@
 name: jira-create
 description: Create a Jira ticket with standard format (title, Summary, AC, Dev Notes). Shows draft for approval before creating.
 argument-hint: "<domain and feature area>"
-disable-model-invocation: true
 ---
 
 # Jira Create
