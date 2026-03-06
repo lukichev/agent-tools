@@ -75,12 +75,14 @@ Only `description` is recommended. All other fields are optional.
 
 ### Dynamic context injection
 
-Use `` !`command` `` to run shell commands before the skill content is sent to Claude:
+Use the syntax `!` followed by a backtick-wrapped shell command to inject dynamic output before the skill is sent to Claude:
 
 ```markdown
-Current branch: !`git branch --show-current`
-Changed files: !`git diff main...HEAD --name-only`
+Current branch: !{git branch --show-current}
+Changed files: !{git diff main...HEAD --name-only}
 ```
+
+(Note: in actual skill files, use backtick-wrapped commands after `!` — the syntax here is illustrative.)
 
 Commands execute immediately and their output replaces the placeholder.
 
