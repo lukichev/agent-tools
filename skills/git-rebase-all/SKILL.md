@@ -17,17 +17,16 @@ git branch --show-current
 
 Record the current branch name for context.
 
-### 2. Fetch All Open MRs
+### 2. Check MR Status
 
-```bash
-glab mr list --author=@me --output json
-```
+Run `/mr-status-check` first to show the user a dashboard of all their MRs — pipeline status, unresolved comments, rebase needs.
 
-Parse the JSON to build a list of MRs with: `iid`, `title`, `source_branch`, `target_branch`.
+From the status check results, identify which MRs actually need rebasing:
+- `has_conflicts: true`
+- `detailed_merge_status: "need_rebase"`
+- Or user explicitly requested rebasing all
 
-If no MRs are found, inform the user and stop.
-
-Show the user the list of MRs that will be rebased before starting.
+If no MRs need rebasing, inform the user and stop. If only some need rebasing, show which ones will be rebased and confirm with the user.
 
 ### 3. Fetch all branches upfront
 
@@ -39,7 +38,7 @@ git fetch origin <branch1> <branch2> <branch3> ...
 
 ### 4. Spawn Subagents
 
-Spawn one Agent tool call per MR, all in a **single message** so they run in parallel. Use `isolation: "worktree"` on each Agent call — this gives each subagent its own isolated copy of the repo automatically.
+Spawn one Agent tool call per MR that needs rebasing, all in a **single message** so they run in parallel. Use `isolation: "worktree"` on each Agent call — this gives each subagent its own isolated copy of the repo automatically.
 
 Each subagent prompt should include the full rebase instructions (the subagent won't have skill context):
 
@@ -95,5 +94,7 @@ git worktree prune
 ## Rules
 
 - All rebase logic (strategies, conflict resolution, push) is owned by `/git-rebase` — don't duplicate it here
+- Always run `/mr-status-check` first to show the full picture before rebasing
 - Spawn all rebases in a **single message** with multiple Agent tool calls using `isolation: "worktree"` so they run concurrently in isolated copies
 - Fetch all branches upfront before spawning to avoid network race conditions
+- Only rebase MRs that need it — skip ones already up to date unless the user explicitly asks for all

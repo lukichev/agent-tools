@@ -35,16 +35,37 @@ Derive domain and feature area from the project's module/service structure. Read
 
 ## Description Format
 
-Use the template from `ticket-template.md` in this skill folder:
+Use the template from `ticket-template.md` in this skill folder as the base (Summary + AC). Then add conditional sections based on ticket type:
 
 | Placeholder | Replace with |
 |-------------|--------------|
 | `{{SUMMARY}}` | 1-2 sentences explaining the fix/change |
 | `{{AC_ITEM_N}}` | Acceptance criterion |
 | `{{AC_DETAIL}}` | Sub-detail if needed |
-| `{{ROOT_CAUSE}}` | Why the bug exists |
-| `{{SOLUTION}}` | Brief description of the fix |
-| Error tracking ID | Mention in Dev Notes if available (e.g., Sentry issue ID) |
+
+### Conditional Sections
+
+Add these sections **after AC** only when relevant:
+
+**Steps to Reproduce** — Include for Bug tickets when reproduction steps are known:
+```
+## Steps to Reproduce
+
+1. Step one
+2. Step two
+3. Observe the issue
+```
+
+**Dev Notes** — Include only when the root cause and solution are already known (typically developer-authored bug fixes). Omit for stories, tasks, and bugs where the cause is unknown:
+```
+## Dev Notes
+
+Root cause: why the bug exists
+
+Solution: brief description of the fix
+```
+
+If an error tracking ID is available (e.g., Sentry issue), mention it in Dev Notes.
 
 ## QA Section (Optional)
 
