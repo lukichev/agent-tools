@@ -1,6 +1,7 @@
 ---
 name: git-rebase-all
 description: Rebase all open GitLab MRs onto their target branches in parallel. Fetches MRs authored by the current user, spawns an isolated subagent per MR using Agent tool worktree isolation, and reports results. Use when the user says "rebase all my MRs", "rebase all branches", "update all my MRs", or "rebase everything".
+disable-model-invocation: true
 ---
 
 # Rebase All MRs
@@ -21,24 +22,38 @@ Record the current branch name for context.
 
 Run `/mr-status-check` first to show the user a dashboard of all their MRs — pipeline status, unresolved comments, rebase needs.
 
-From the status check results, identify which MRs actually need rebasing:
-- `has_conflicts: true`
-- `detailed_merge_status: "need_rebase"`
-- Or user explicitly requested rebasing all
+From the status check results, classify MRs that need rebasing (behind > 0) into two groups:
 
-If no MRs need rebasing, inform the user and stop. If only some need rebasing, show which ones will be rebased and confirm with the user.
+- **No conflicts** (`has_conflicts: false`) → server-side rebase via GitLab API
+- **Has conflicts** (`has_conflicts: true`) → local rebase via subagent with `/git-rebase`
 
-### 3. Fetch all branches upfront
+If no MRs need rebasing, inform the user and stop.
 
-Before spawning subagents, fetch all source and target branches in one go so subagents don't race on network calls:
+### 3. Server-Side Rebase (No Conflicts)
+
+For MRs behind their target but with no conflicts, trigger GitLab's server-side rebase — faster, no local checkout needed:
+
+```bash
+glab api --method PUT "projects/:fullpath/merge_requests/<iid>/rebase"
+```
+
+Returns `{"rebase_in_progress": true}`. Trigger all eligible ones in parallel, then poll until done:
+
+```bash
+glab api "projects/:fullpath/merge_requests/<iid>"
+```
+
+Check `rebase_in_progress` — when it becomes `null` or `false`, rebase is done. If `merge_error` is set, the rebase failed (may need local conflict resolution as fallback).
+
+### 4. Local Rebase (Conflicts)
+
+For MRs with conflicts, fetch all source and target branches upfront:
 
 ```bash
 git fetch origin <branch1> <branch2> <branch3> ...
 ```
 
-### 4. Spawn Subagents
-
-Spawn one Agent tool call per MR that needs rebasing, all in a **single message** so they run in parallel. Use `isolation: "worktree"` on each Agent call — this gives each subagent its own isolated copy of the repo automatically.
+Then spawn one Agent tool call per MR, all in a **single message** so they run in parallel. Use `isolation: "worktree"` on each Agent call — this gives each subagent its own isolated copy of the repo automatically.
 
 Each subagent prompt should include the full rebase instructions (the subagent won't have skill context):
 

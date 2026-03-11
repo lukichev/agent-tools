@@ -4,6 +4,7 @@ description: Research an escalation or issue ticket, find related historical tic
 argument-hint: "<ticket ID, e.g. PROJ-1234>"
 context: fork
 agent: escalation-researcher
+disable-model-invocation: true
 ---
 
 # Escalation Research

@@ -2,6 +2,7 @@
 name: mr-comment
 description: Post numbered review suggestions as inline diff comments on a GitLab MR. Use after /mr-review.
 argument-hint: "<MR number> <comment numbers, e.g. 1,3,5 or all>"
+disable-model-invocation: true
 ---
 
 # MR Comment

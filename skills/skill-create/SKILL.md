@@ -2,6 +2,7 @@
 name: skill-create
 description: Create new skills, modify and improve existing skills. Use when users want to create a skill from scratch, turn a workflow into a reusable skill, update or optimize an existing skill, or improve a skill's description for better triggering accuracy. Also use when the user says "turn this into a skill", "make a skill for X", or "improve this skill".
 argument-hint: "<skill name or description of what it should do>"
+disable-model-invocation: true
 ---
 
 # Skill Creator

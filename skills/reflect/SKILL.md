@@ -4,6 +4,7 @@ description: Reflect on the current session — recover context lost to compacti
 argument-hint: "<question or 'summary'>"
 context: fork
 agent: session-reflector
+disable-model-invocation: true
 ---
 
 # Reflect

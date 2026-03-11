@@ -40,22 +40,35 @@ Count threads where `notes[0].resolvable == true && notes[0].resolved == false`.
 - `detailed_merge_status: "need_rebase"` → needs rebase (behind target)
 - Otherwise → up to date
 
+**Divergence from target** — how far source branch has drifted from its target:
+```bash
+glab api "projects/:fullpath/merge_requests/<iid>" --jq '.diff_refs.base_sha'
+```
+Then count commits on target that aren't in source:
+```bash
+git fetch origin <target_branch> <source_branch> 2>/dev/null
+git rev-list --count origin/<source_branch>..origin/<target_branch>
+```
+This gives the number of commits the source branch is **behind** the target. Display as `N behind` (e.g. `12 behind`, or `up to date` if 0).
+
 ### 3. Display Summary Table
 
 ```
-| MR    | Title                          | Pipeline | Comments | Rebase   | Status          |
-|-------|--------------------------------|----------|----------|----------|-----------------|
-| !123  | feat(auth): add SSO, DOC-1234  | passed   | 2 unresolved | needed   | needs attention |
-| !124  | fix(billing): prorate, DOC-5678| running  | none     | ok       | waiting         |
-| !125  | refactor(deps): luxon, DOC-9175| manual   | none     | ok       | ready           |
+| MR    | Title                          | Pipeline | Comments     | Rebase | Behind   | Status          |
+|-------|--------------------------------|----------|--------------|--------|----------|-----------------|
+| !123  | feat(auth): add SSO, DOC-1234  | passed   | 2 unresolved | needed | 34       | needs attention |
+| !124  | fix(billing): prorate, DOC-5678| running  | none         | ok     | 12       | waiting         |
+| !125  | refactor(deps): luxon, DOC-9175| manual   | none         | ok     | 0        | ready           |
 ```
 
 **Status column logic:**
-- `needs attention` — has unresolved comments OR has conflicts
+- `needs attention` — has unresolved comments OR has conflicts OR behind > 0
 - `blocked` — pipeline failed
 - `waiting` — pipeline running/pending
-- `ready` — pipeline passed (or manual), no unresolved comments, no rebase needed
+- `ready` — pipeline passed (or manual), no unresolved comments, no rebase needed, **behind == 0**
 - `draft` — MR is marked as draft
+
+A branch that is behind its target is **not mergeable** — it must be rebased first.
 
 ### 4. Show Unresolved Comments Detail
 
@@ -69,21 +82,13 @@ For each MR with unresolved comments, show a brief summary:
 
 Keep it brief — first line of each comment, truncated to 100 chars.
 
-### 5. Actionable Suggestions
-
-Based on the results, suggest next steps:
-
-- MRs needing rebase → "Run `/git-rebase-all` to rebase all branches"
-- MRs with unresolved comments → "Run `/mr-review <iid>` to see full discussion"
-- MRs ready to merge → "These MRs are ready to merge"
-
 ## Output Format
 
 Return the summary table AND the per-MR details as structured data so callers (like `/git-rebase-all`) can consume programmatically. Always show the human-readable table to the user.
 
 ## Rules
 
-- Read-only — never modify MRs, push, or rebase
+- **Read-only** — never modify MRs, push, or rebase
 - Fetch MR details in parallel to minimize latency
 - Truncate long titles to 40 chars in the table
 - Sort MRs: needs attention first, then waiting, then ready

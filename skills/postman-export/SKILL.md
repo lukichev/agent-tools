@@ -2,6 +2,7 @@
 name: postman-export
 description: Generate Postman collection JSON from API controllers/routes on the current branch. Scans the diff, reads endpoints and DTOs/schemas, and writes a .postman_collection.json file.
 argument-hint: "<module or path (optional)>"
+disable-model-invocation: true
 ---
 
 # Postman Export

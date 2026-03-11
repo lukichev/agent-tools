@@ -2,6 +2,7 @@
 name: git-publish
 description: End-to-end publish flow — commit, push, and create GitLab MR in one command. Orchestrates /git-commit, /git-push, and /mr-create skills.
 argument-hint: "<commit type (optional)>"
+disable-model-invocation: true
 ---
 
 # Git Publish
