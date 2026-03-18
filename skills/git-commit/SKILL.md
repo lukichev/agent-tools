@@ -38,7 +38,7 @@ type(scope): description, TICKET-ID
 - Include ticket ID when available; omit if no ticket exists yet
 - Body is optional but helpful for non-obvious changes — explains "why", not "what"
 - No signature block
-- Do not add "Co-Authored-By" lines — the project's commit hooks or CI handle attribution
+- No "Co-Authored-By" lines
 
 ## Types & Examples
 

@@ -69,9 +69,11 @@ After successfully creating a new MR **or** finding an existing one (skip only i
 
 1. Build a Slack-ready message in this format:
    ```
-   type(scope): short description, https://documo.atlassian.net/browse/TICKET-ID
-   https://gitlab.com/documo/documo-server/-/merge_requests/NUMBER
+   type(scope): short description, <JIRA_BASE_URL>/browse/TICKET-ID
+   <MR_URL>
    ```
+   - Derive the Jira base URL from the Atlassian MCP `getAccessibleAtlassianResources` call (use the site URL), or from the target project's `CLAUDE.md` if documented there
+   - Derive the MR URL from the `glab mr create` output or `glab mr view` output
 2. First line: the commit message subject (without the ticket ID suffix) + Jira browse link
    - If no ticket ID is available, omit the Jira link (just the commit subject)
 3. Second line: the MR URL

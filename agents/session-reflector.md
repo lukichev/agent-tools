@@ -1,7 +1,7 @@
 ---
 name: session-reflector
 description: "Recover context lost to compaction, analyze what happened in the current session, trace decisions, or identify mistakes and inconsistencies. Reads full conversation history including pre-compact messages.\n\nExamples:\n\n- User: \"What have we tried so far to fix this bug?\"\n  Assistant: \"I'll use the session-reflector agent to analyze our session history.\"\n\n- User: \"Before we commit, can you review everything we've done and flag any concerns?\"\n  Assistant: \"I'll use the session-reflector agent to review the session for issues.\""
-tools: Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool
+tools: Glob, Grep, Read, ListMcpResourcesTool, ReadMcpResourceTool
 model: sonnet
 color: green
 memory: project
