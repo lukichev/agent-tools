@@ -39,6 +39,12 @@ git checkout -b <branch-name>
 
 Branch name is the Jira ticket number (e.g. `DOC-1020`) or the slugified feature name.
 
+**Worktree variant** — if the user asks to work in a worktree (e.g. "in a worktree", "isolated"), skip step 3/4 and use `EnterWorktree` with `<branch-name>` instead. The tool creates `worktree-<branch-name>`; immediately rename it to drop the prefix:
+
+```
+git branch -m worktree-<branch-name> <branch-name>
+```
+
 ### 5. If Jira ticket — research and plan
 
 If the argument was a Jira ticket number:

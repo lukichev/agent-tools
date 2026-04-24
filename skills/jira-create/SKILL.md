@@ -72,6 +72,11 @@ If an error tracking ID is available (e.g., Sentry issue), mention it in Dev Not
 
 For UI/frontend changes, add a **QA — Affected Pages** section listing all pages that need visual testing. Include route paths and what to verify on each page. Add this section when user requests it or when changes touch multiple UI pages.
 
+## AC Quality Rules
+
+- AC must be **explicit and testable**. Vague criteria like "X works like before" or "No regressions" are not acceptable AC.
+- Each AC item should describe a specific, observable behavior or outcome that can be verified independently.
+
 ## Important
 
 - Always show full ticket text to user before creating
