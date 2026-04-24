@@ -42,28 +42,49 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 
 ## Skills
 
+### Git workflow
+
 | Skill | Purpose |
 |-------|---------|
-| `/reflect` | Session retrospective via session-reflector agent |
+| `/git-start` | Start a branch from latest main for a Jira ticket or feature name (optionally worktree-isolated) |
 | `/git-commit` | Stage files and create a conventional commit |
 | `/git-push` | Push branch to remote (creates feature branch from main if needed) |
+| `/git-rebase` | Rebase current branch onto its MR target (or main), handles squash-merged parents |
+| `/git-rebase-all` | Rebase all open GitLab MRs in parallel via isolated subagents |
 | `/git-publish` | End-to-end: orchestrates `/git-commit` → `/git-push` → `/mr-create` |
-| `/git-rebase` | Rebase current branch onto main (or another target), handles squash-merged parents |
 | `/ready-check` | Pre-publish gate — AC completeness, debug artifact scan, code review |
+
+### GitLab merge requests
+
+| Skill | Purpose |
+|-------|---------|
 | `/mr-create` | Create GitLab MR with description (`glab`) |
 | `/mr-review` | Load and review a GitLab MR with comments |
 | `/mr-comment` | Post numbered review suggestions as inline diff comments on a GitLab MR |
+| `/mr-status-check` | Dashboard of your open MRs — pipeline, comments, rebase needs, merge readiness |
+
+### Atlassian
+
+| Skill | Purpose |
+|-------|---------|
 | `/jira-create` | Create Jira tickets with standard format |
 | `/atlassian-research` | Research Jira tickets/topics via atlassian-researcher agent |
-| `/postman-export` | Generate Postman collection JSON from API endpoints on current branch |
 | `/escalation-research` | Deep investigation of escalation/issue tickets |
-| `/skill-creator` | Create new skills or improve existing ones |
+
+### Other
+
+| Skill | Purpose |
+|-------|---------|
+| `/reflect` | Session retrospective via session-reflector agent |
+| `/postman-export` | Generate Postman collection JSON from API endpoints on current branch |
+| `/skill-create` | Create new skills or improve existing ones |
 
 ## Code Style Guides
 
 | Guide | Import with |
 |-------|-------------|
-| Angular 19 | `@guides/angular.md` |
+| Angular 21 | `@guides/angular.md` |
+| NestJS | `@guides/nestjs.md` |
 | Python 3.10+ | `@guides/python.md` |
 
 ## Helpful Links
