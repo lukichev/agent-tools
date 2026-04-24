@@ -79,7 +79,7 @@ If none found: `✅ No debug artifacts found`
 
 ### 6. Code Review
 
-Launch the `code-reviewer` agent scoped to the changed files from step 2.
+Launch the `code-reviewer` agent via the Agent tool, scoped to the changed files from step 2.
 
 Pass the list of changed files and the diff as context so the agent focuses only on what was modified.
 

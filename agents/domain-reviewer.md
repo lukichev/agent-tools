@@ -1,6 +1,6 @@
 ---
 name: domain-reviewer
-description: "Analyze core domain logic, business rules, algorithms, and data processing pipelines for correctness, edge cases, and safety. Reads project context to apply deep domain-specific review.\n\nExamples:\n\n- User: \"Review my algorithm and tell me what's wrong with it\"\n  Assistant: \"I'll use the domain-reviewer agent to analyze your algorithm.\"\n\n- User: \"Are the business rules implemented properly?\"\n  Assistant: \"I'll use the domain-reviewer agent to audit your business rule implementations.\""
+description: "Analyze core domain logic, business rules, algorithms, and data processing pipelines for correctness, edge cases, and safety. Use for deep analysis of a specific algorithm, formula, or business rule in isolation — not for reviewing a full changeset (use code-reviewer for that). Reads project context to apply deep domain-specific review.\n\nExamples:\n\n- User: \"Review my algorithm and tell me what's wrong with it\"\n  Assistant: \"I'll use the domain-reviewer agent to analyze your algorithm.\"\n\n- User: \"Are the business rules implemented properly?\"\n  Assistant: \"I'll use the domain-reviewer agent to audit your business rule implementations.\""
 tools: Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool
 model: opus
 color: green

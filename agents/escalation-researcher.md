@@ -120,12 +120,6 @@ Omit this section entirely if the root cause is already clear from the research.
 
 ---
 
-### Questions for Customer
-
-- …
-
----
-
 ### Suggested Tickets to Link
 
 | Ticket | Title | Status | Link Type | Reason |

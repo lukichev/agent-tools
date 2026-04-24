@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv:*)",
+      "Bash(git:*)",
+      "Bash(glab:*)",
+      "Bash(curl:*)",
+      "Bash(jq:*)",
+      "WebFetch(domain:docs.nestjs.com)",
+      "WebFetch(domain:angular.io)",
+      "WebFetch(domain:docs.python.org)"
+    ]
+  }
+}

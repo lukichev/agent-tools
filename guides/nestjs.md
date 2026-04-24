@@ -1,6 +1,6 @@
 # NestJS Style Guide
 
-Based on the Documo codebase conventions, NestJS official docs, and team best practices.
+Based on NestJS official docs and established best practices.
 
 ---
 
@@ -85,7 +85,7 @@ src/
 | DB columns       | `snake_case`        | `account_id`, `created_at`       |
 | Route paths      | `kebab-case`        | `v1/recurring-reports`           |
 
-**Project prefix:** All public classes use the project prefix (`Dcm` in Documo). Apply your project's prefix consistently.
+**Project prefix:** All public classes use a consistent project prefix (examples below use `Dcm` for illustration). Apply your project's prefix consistently.
 
 ```typescript
 // Good

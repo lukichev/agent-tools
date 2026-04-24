@@ -71,11 +71,11 @@ Each subagent prompt should include full instructions (the subagent won't have s
 >
 > Report back: rebased and pushed, already up to date, conflicts resolved and pushed, or failed with reason.
 
-### 5. Collect Results
+### 4. Collect Results
 
 Wait for all subagents to complete. Collect each result.
 
-### 6. Report Results
+### 5. Report Results
 
 Show a summary table:
 
@@ -88,7 +88,7 @@ Show a summary table:
 | !126  | feat/current-work   | main   | failed — aborted               |
 ```
 
-### 7. Final Cleanup
+### 6. Final Cleanup
 
 The Agent tool's `isolation: "worktree"` leaves worktrees and tracking branches behind when agents make changes. Clean up both:
 
