@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: "Launch after code has been written or modified to perform comprehensive multi-lens review of a diff or changeset: bugs, security, performance, architecture, style, testing, maintainability, and anti-pattern detection. Should be launched proactively after significant code changes. For deep analysis of a single algorithm or business rule in isolation, use domain-reviewer instead.\n\nExamples:\n\n- User: *completes implementing a feature*\n  Assistant: \"I'll use the code-reviewer agent to review the changes.\"\n\n- User: \"Can you review the changes I made today?\"\n  Assistant: \"I'll use the code-reviewer agent to perform a comprehensive review.\""
-tools: Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool
+tools: Bash, Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool
 model: opus
 color: purple
 memory: project
@@ -25,6 +25,7 @@ Then inspect the changed files and load only the guides that match what's actual
 - Any changed file contains `@nestjs/` imports → read `~/.claude/guides/nestjs.md`
 - Any changed file contains `@angular/` imports → read `~/.claude/guides/angular.md`
 - Any changed file is `.py` → read `~/.claude/guides/python.md`
+- Any changed file is `.dart` or `pubspec.yaml` → read `~/.claude/guides/flutter.md`
 
 Load only guides with a matching signal — skip the rest. Use loaded guides as the authoritative style and architecture reference alongside CLAUDE.md. Flag guide violations as **Minor** or **Major** issues. When a guide rule conflicts with local code patterns, the guide takes precedence.
 

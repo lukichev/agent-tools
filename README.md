@@ -15,13 +15,18 @@ ln -s /path/to/agent-tools/skills/ /your-project/.claude/skills
 cp -r /path/to/agent-tools/{agents,skills} /your-project/.claude/
 ```
 
-For code style guides, import them from your project's `CLAUDE.md`:
+For code style guides, symlink them globally (agents like `code-reviewer` expect `~/.claude/guides/`):
+
+```bash
+ln -s /path/to/agent-tools/guides/ ~/.claude/guides
+```
+
+Then reference them **on demand** from your project's `CLAUDE.md` — do NOT `@import` them. An `@import` loads the full guide (2–7k tokens) into every session, even ones that never touch code. A pointer line costs nothing until the guide is actually needed:
 
 ```markdown
-@/path/to/agent-tools/guides/angular.md
+## Code Style
 
-## Project-Specific
-[your project-specific rules here]
+Before writing or reviewing Angular code, read `~/.claude/guides/angular.md` and follow it.
 ```
 
 ## How It Works
@@ -51,6 +56,7 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 | `/git-push` | Push branch to remote (creates feature branch from main if needed) |
 | `/git-rebase` | Rebase current branch onto its MR target (or main), handles squash-merged parents |
 | `/git-rebase-all` | Rebase all open GitLab MRs in parallel via isolated subagents |
+| `/git-cleanup` | Prune merged branches, clean worktrees, and review stashes after merges (verifies before deleting) |
 | `/git-publish` | End-to-end: orchestrates `/git-commit` → `/git-push` → `/mr-create` |
 | `/ready-check` | Pre-publish gate — AC completeness, debug artifact scan, code review |
 
@@ -81,11 +87,14 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 
 ## Code Style Guides
 
-| Guide | Import with |
-|-------|-------------|
-| Angular 21 | `@guides/angular.md` |
-| NestJS | `@guides/nestjs.md` |
-| Python 3.10+ | `@guides/python.md` |
+Referenced on demand (see Usage) — never `@import`ed into `CLAUDE.md`.
+
+| Guide | Path |
+|-------|------|
+| Angular 21 | `~/.claude/guides/angular.md` |
+| NestJS | `~/.claude/guides/nestjs.md` |
+| Python 3.10+ | `~/.claude/guides/python.md` |
+| Flutter / Dart | `~/.claude/guides/flutter.md` |
 
 ## Helpful Links
 

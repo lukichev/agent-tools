@@ -1,8 +1,8 @@
-## Summary
+**Summary**
 
 {{SUMMARY}}
 
-## AC
+**AC**
 
 * {{AC_ITEM_1}}
     * {{AC_DETAIL}}

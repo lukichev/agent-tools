@@ -1,6 +1,6 @@
 # Angular 21 Code Style Guide
 
-Modern Angular 21 patterns and best practices. Import this into your project's `CLAUDE.md` with `@guides/angular.md`, then add project-specific sections below.
+Modern Angular 21 patterns and best practices. Reference this on demand from your project's `CLAUDE.md` (e.g. "Before writing or reviewing code in this stack, read `~/.claude/guides/angular.md`"). Do not `@import` it — that loads the full guide into every session.
 
 ## TypeScript
 

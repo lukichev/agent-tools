@@ -13,15 +13,15 @@ Stage changed files and create a commit with a conventional commit message.
 1. Review current state:
    ```bash
    git status
-   git diff
-   git diff --staged
+   git diff           # unstaged changes
    ```
+   If anything is already staged, also run `git diff --staged` — otherwise skip it (empty until step 3).
 2. Use `AskUserQuestion` to confirm:
    - Which files to stage (or confirm all modified)
    - Ticket ID (or detect from branch name like `PROJ-1234`)
    - Type override if not obvious from the diff (fix/feat/refactor/etc.)
 3. Stage specific files (prefer explicit files over `git add -A`)
-4. Analyze the staged diff and generate commit message
+4. Analyze the staged diff (`git diff --staged`) and generate the commit message
 5. Show the message to the user, then commit
 
 ## Commit Message Format

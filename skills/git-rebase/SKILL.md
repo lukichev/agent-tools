@@ -63,16 +63,37 @@ Priority for determining the target branch:
 2. Target branch of an existing MR for the source branch
 3. Fall back to `main`
 
-### 3. Set Up Worktree (worktree mode only)
+### 2b. Authoritative Merge Status (avoid the `unchecked` trap)
+
+`glab mr list` returns *cached* mergeability — often `detailed_merge_status: "unchecked"` with a meaningless `has_conflicts: false`. To force GitLab's lazy recompute, hit the **single-MR GET** endpoint and poll until the status leaves `unchecked`/`checking`:
 
 ```bash
-git fetch origin <source-branch>
-git worktree add /tmp/rebase-<source-branch> origin/<source-branch> --detach
-cd /tmp/rebase-<source-branch>
-git checkout -B <source-branch> origin/<source-branch>
+while :; do
+  dms=$(glab api "projects/:fullpath/merge_requests/<iid>" \
+    | python3 -c "import json,sys;print(json.load(sys.stdin)['detailed_merge_status'])")
+  [ "$dms" != unchecked ] && [ "$dms" != checking ] && break
+  sleep 3
+done
 ```
 
-All subsequent git commands run inside the worktree directory.
+Key off `detailed_merge_status` (not `has_conflicts`): `conflict` (or `merge_status: "cannot_be_merged"`) means a **local worktree rebase is required, not server-side**; `need_rebase` and the clean states are safe server-side. Gotcha: `glab --jq` may return empty — pipe raw JSON to `python3`/`jq`. The consumer that must act on this is `git-rebase-all` / `mr-status-check`.
+
+### 3. Set Up Worktree (worktree mode only)
+
+Branch names can contain `/` (e.g. `feat/foo`), which would break a path like `/tmp/rebase-feat/foo`. Sanitize the branch name for the path by replacing `/` with `-`:
+
+```bash
+SOURCE_BRANCH="<source-branch>"
+SAFE_BRANCH="${SOURCE_BRANCH//\//-}"
+WORKTREE_DIR="/tmp/rebase-${SAFE_BRANCH}"
+
+git fetch origin "$SOURCE_BRANCH"
+git worktree add "$WORKTREE_DIR" "origin/$SOURCE_BRANCH" --detach
+cd "$WORKTREE_DIR"
+git checkout -B "$SOURCE_BRANCH" "origin/$SOURCE_BRANCH"
+```
+
+All subsequent git commands run inside `$WORKTREE_DIR`. The original branch name (with `/`) is preserved everywhere except the filesystem path.
 
 ### 4. Fetch and Analyse
 
@@ -116,7 +137,7 @@ This replays only the source branch's commits onto the target, skipping the pare
 
 ### 6. Handle Conflicts
 
-Conflict resolution works the same in both modes — the only difference is the file paths (working directory vs `/tmp/rebase-<branch>`).
+Conflict resolution works the same in both modes — the only difference is the file paths (working directory vs `$WORKTREE_DIR`, which is `/tmp/rebase-<sanitized-branch>`).
 
 - Read the conflicted files (use their full paths in the worktree if applicable)
 - Resolve by keeping the correct version (usually ours for our own files, theirs for files we didn't touch)
@@ -143,7 +164,7 @@ git push --force-with-lease origin <source-branch>
 
 ```bash
 cd /                          # leave the worktree directory first
-git worktree remove /tmp/rebase-<source-branch> --force
+git worktree remove "$WORKTREE_DIR" --force
 ```
 
 If the rebase was aborted (hopeless conflicts), clean up the worktree too.
@@ -166,7 +187,7 @@ glab mr update <MR-NUMBER> --target-branch <target>
 | Plain rebase has many conflicts on commits that aren't ours | Abort and use `--onto` strategy (squash-merge case) |
 | Conflicts keep recurring | Check for duplicate commits: `git log --oneline origin/<target>..HEAD` |
 | Rebase went wrong | `git rebase --abort` restores pre-rebase state |
-| Worktree already exists at path | `git worktree remove /tmp/rebase-<branch> --force` then retry |
+| Worktree already exists at path | `git worktree remove /tmp/rebase-<sanitized-branch> --force` then retry (replace `/` with `-` in branch name) |
 
 ## Rules
 

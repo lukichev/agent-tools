@@ -1,6 +1,6 @@
 # Python Code Style Guide
 
-Modern Python 3.10+ patterns and best practices. Import this into your project's `CLAUDE.md` with `@guides/python.md`, then add project-specific sections below.
+Modern Python 3.10+ patterns and best practices. Reference this on demand from your project's `CLAUDE.md` (e.g. "Before writing or reviewing code in this stack, read `~/.claude/guides/python.md`"). Do not `@import` it — that loads the full guide into every session.
 
 ## Type Hints — Modern Python 3.10+ Style
 

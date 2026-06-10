@@ -1,6 +1,7 @@
 ---
 name: mr-status-check
 description: Check status of all open MRs authored by the current user. Shows pipeline status, unresolved comments, rebase needs, and merge readiness. Use when the user says "check my MRs", "MR status", "any comments on my MRs?", "do I need to rebase?", or "what needs attention?".
+context: fork
 ---
 
 # MR Status Check
@@ -84,7 +85,30 @@ Keep it brief — first line of each comment, truncated to 100 chars.
 
 ## Output Format
 
-Return the summary table AND the per-MR details as structured data so callers (like `/git-rebase-all`) can consume programmatically. Always show the human-readable table to the user.
+This skill runs in a forked context — only the final message reaches the caller, so it must be self-contained. Always include both:
+
+1. The human-readable summary table and unresolved-comment details
+2. A fenced JSON block with one record per MR so callers (like `/git-rebase-all`) can consume it programmatically:
+
+```json
+[
+  {
+    "iid": 123,
+    "title": "feat(auth): add SSO, DOC-1234",
+    "source_branch": "DOC-1234",
+    "target_branch": "main",
+    "pipeline": "success",
+    "unresolved_comments": 2,
+    "has_conflicts": false,
+    "detailed_merge_status": "need_rebase",
+    "behind": 34,
+    "status": "needs attention",
+    "web_url": "https://gitlab.example.com/group/project/-/merge_requests/123"
+  }
+]
+```
+
+Include every open MR in the JSON (even `ready` ones) — `/git-rebase-all` needs the full list to resolve stacked-MR parent relationships.
 
 ## Rules
 

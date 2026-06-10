@@ -25,8 +25,14 @@ glab mr list --source-branch "$(git branch --show-current)"
 - Print the existing MR URL and title
 - Ask the user: "MR already exists. Do you want to update its description?"
 - If user says **no** → stop, do nothing further
-- If user says **yes** → generate new description content using the template, show it to the user for approval, then **append** it to the existing description (do NOT replace). Use `glab mr update` to update description only — **never overwrite the title**
-- **Never replace the MR description or title completely** — always append new content below the existing description, separated by a horizontal rule (`---`)
+- If user says **yes** → edit the existing description **in place** with `glab mr update`. **Do NOT** wholesale replace, and **do NOT** append a separate "Update after X" section below a `---` separator. Instead:
+  - Read the current description first
+  - Extend specific bullets with new information that the new commits introduced
+  - Rewrite bullets that are no longer factually accurate (e.g. a method name was renamed or removed)
+  - Leave untouched anything still correct, preserving the original wording
+  - Show the merged result to the user for approval before pushing
+- **Never overwrite the title** with `glab mr update`
+- **Exception** — wholesale rewrite is acceptable when the MR is single-commit and was just force-pushed/amended (no review history to preserve). In that case, write a clean fresh description.
 
 ### 2. Create New MR (only if no existing MR)
 
@@ -59,9 +65,9 @@ Use the template from `mr-template.md` in this skill folder:
 | Placeholder | Replace with |
 |-------------|--------------|
 | `{{TICKET_ID}}` | Ticket ID (e.g., PROJ-1234) — omit section if no ticket |
-| `{{SUMMARY}}` | 1-2 sentences: what was addressed |
-| `{{DETAILS}}` | Explain the changes and why |
-| `{{TESTING}}` | What the developer did to verify the changes (not a QA checklist) |
+| `{{SUMMARY}}` | One sentence: what was addressed |
+| `{{DETAILS}}` | 2-4 short bullets: what changed. No narrative, no restating the ticket. Omit if summary already covers it. |
+| `{{TESTING}}` | Short bullets of what the developer verified (not a QA checklist) |
 
 ### 3. Post-MR Slack Message
 
@@ -90,9 +96,11 @@ After successfully creating a new MR **or** finding an existing one (skip only i
 - Target branch is `main` unless user specifies otherwise
 - Always set `--remove-source-branch`
 - **Never replace an existing MR's title**
-- **Never replace an existing MR's description** — only append below a `---` separator
+- **After new commits land on an existing MR, edit the description in place** — extend bullets with new info, rewrite stale ones, leave the rest alone. Do NOT wholesale replace AND do NOT append below a `---` separator.
+- Wholesale rewrite IS acceptable for a single-commit force-push/amend (no review history yet)
 - Only update an existing MR's description when the user explicitly asks for it
 - **Never use checkboxes** (`- [ ]`) in the Testing section — use plain bullet points instead
+- **Keep descriptions terse.** Summary: one sentence. Details: 2-4 short bullets max — what changed, not a narrative. Testing: short bullets of what was verified. No filler, no restating the ticket, no "this MR does X, Y, and Z" preambles. If a section has nothing meaningful to add, omit it.
 
 ## glab Reference
 
@@ -103,18 +111,17 @@ glab mr create --title "..." --description "..." --target-branch main --remove-s
 # Check if MR exists for current branch
 glab mr list --source-branch "$(git branch --show-current)"
 
-# View existing MR (to read current description before appending)
+# View existing MR (to read current description before editing)
 glab mr view <MR-NUMBER> --output json
 
-# Update existing MR description (append only — never replace)
-# 1. Read existing description first
-# 2. Append new content below a --- separator
+# Update existing MR description (edit in place — never wholesale replace,
+# never append below a --- separator). See rules above:
+# - Extend specific bullets with new info from the new commits
+# - Rewrite bullets that are no longer factually accurate
+# - Leave untouched anything still correct
+# - Show the merged result to the user for approval before pushing
 glab mr update <MR-NUMBER> --description "$(cat <<'EOF'
-[existing description]
-
----
-
-[new content]
+[merged description — original text with targeted edits, no separator]
 EOF
 )"
 
