@@ -76,10 +76,10 @@ Each subagent prompt must be self-contained.
 ```
 | MR    | Branch    | Target    | Wave | Reason          | Result                  |
 |-------|-----------|-----------|------|-----------------|-------------------------|
-| !6465 | DOC-9572  | main      | 1    | 21 behind       | server-side rebased     |
-| !6570 | DOC-9670  | main      | 1    | 2 behind        | server-side rebased     |
-| !6575 | DOC-9184  | DOC-9670  | 2    | parent rebased  | server-side rebased     |
-| !6580 | DOC-9574  | DOC-9184  | 3    | parent rebased  | skipped (parent failed) |
+| !6465 | PROJ-9572 | main      | 1    | 21 behind       | server-side rebased     |
+| !6570 | PROJ-9670 | main      | 1    | 2 behind        | server-side rebased     |
+| !6575 | PROJ-9184 | PROJ-9670 | 2    | parent rebased  | server-side rebased     |
+| !6580 | PROJ-9574 | PROJ-9184 | 3    | parent rebased  | skipped (parent failed) |
 ```
 
 ### 7. Cleanup

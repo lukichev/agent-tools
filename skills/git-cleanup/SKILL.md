@@ -116,12 +116,12 @@ Always close with a table of every item and its disposition:
 ```
 | Item                        | Type      | Action                  | Why                                  |
 |-----------------------------|-----------|-------------------------|--------------------------------------|
-| origin/feat/DOC-1020        | remote    | pruned                  | deleted upstream                     |
-| /tmp/wt-DOC-1100            | worktree  | converted → branch      | clean; branch kept (not yet merged)  |
-| /tmp/wt-DOC-1099            | worktree  | converted, branch -D    | clean, gone on remote, merged        |
-| /tmp/wt-DOC-1200            | worktree  | left alone              | uncommitted changes                  |
-| DOC-1099                    | branch    | deleted (branch -D)     | gone + content matches main          |
-| DOC-1150                    | branch    | KEPT — unmerged         | gone on remote but diff non-empty    |
+| origin/feat/PROJ-1020       | remote    | pruned                  | deleted upstream                     |
+| /tmp/wt-PROJ-1100           | worktree  | converted → branch      | clean; branch kept (not yet merged)  |
+| /tmp/wt-PROJ-1099           | worktree  | converted, branch -D    | clean, gone on remote, merged        |
+| /tmp/wt-PROJ-1200           | worktree  | left alone              | uncommitted changes                  |
+| PROJ-1099                   | branch    | deleted (branch -D)     | gone + content matches main          |
+| PROJ-1150                   | branch    | KEPT — unmerged         | gone on remote but diff non-empty    |
 | stash@{0}                   | stash     | dropped (confirmed)     | content already in main              |
 | stash@{1}                   | stash     | KEPT                    | unique unsaved work                  |
 ```
