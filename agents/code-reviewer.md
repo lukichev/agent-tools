@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: "Launch after code has been written or modified to perform comprehensive multi-lens review of a diff or changeset: bugs, security, performance, architecture, style, testing, maintainability, and anti-pattern detection. Should be launched proactively after significant code changes. For deep analysis of a single algorithm or business rule in isolation, use domain-reviewer instead.\n\nExamples:\n\n- User: *completes implementing a feature*\n  Assistant: \"I'll use the code-reviewer agent to review the changes.\"\n\n- User: \"Can you review the changes I made today?\"\n  Assistant: \"I'll use the code-reviewer agent to perform a comprehensive review.\""
+description: "Launch after code has been written or modified to perform comprehensive multi-lens review of a diff or changeset: bugs, security, performance, architecture, style, testing, maintainability, and anti-pattern detection. Should be launched proactively after significant code changes. For deep analysis of a single algorithm or business rule in isolation, use logic-reviewer instead.\n\nExamples:\n\n- User: *completes implementing a feature*\n  Assistant: \"I'll use the code-reviewer agent to review the changes.\"\n\n- User: \"Can you review the changes I made today?\"\n  Assistant: \"I'll use the code-reviewer agent to perform a comprehensive review.\""
 tools: Bash, Glob, Grep, Read, WebFetch, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool
 model: opus
 color: purple
