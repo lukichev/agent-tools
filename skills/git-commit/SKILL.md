@@ -39,8 +39,7 @@ type(scope): description, TICKET-ID
 - Ticket ID after a comma at the end (e.g., `fix(auth): handle timeout, PROJ-1234`)
 - Include ticket ID when available; omit if no ticket exists yet
 - Body is optional but helpful for non-obvious changes — explains "why", not "what"
-- No signature block
-- No "Co-Authored-By" lines
+- No signature, attribution or `Co-Authored-By` trailer
 
 ## Types & Examples
 

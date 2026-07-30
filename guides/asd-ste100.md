@@ -19,6 +19,10 @@ These rules apply to natural-language prose that you generate for a human reader
 
 They do not apply to the instruction files in this repository, which use a different house style. Do not rewrite an existing instruction file to match these rules unless someone asks for it.
 
+**Never lose content to satisfy a rule.** A safety condition, a scope qualifier, an exception or a number stays, even when keeping it makes the sentence longer than the limit. Split the sentence instead. If a rule and the facts conflict, keep the facts and say what you could not compress.
+
+These rules are deliberately flat and literal. They do not suit copy where voice or persuasion is the point.
+
 ## Sentence construction
 
 - One instruction or one idea per sentence.
@@ -29,12 +33,14 @@ They do not apply to the instruction files in this repository, which use a diffe
 - Keep noun clusters to 3 words or fewer. Break up longer ones.
 - Use "must" for mandatory actions and requirements. Do not use "should", "may" or "might" for anything that is actually required.
 - Do not drop articles ("a", "the"). Write "Open the file", not "Open file".
+- **Do not omit words to shorten a sentence.** Dropping a subject, a verb or an article creates ambiguity instead of clarity. "Files not backed up will be lost" hides which files. Write "The system deletes every file that it did not back up."
 - Use the imperative for an action: "Move the check into the service."
 - Write procedures as a numbered sequence of short steps, one action per step.
 
 ## Vocabulary
 
 - One word, one meaning: pick a single term for a concept and reuse it. Do not vary vocabulary for style ("delete", not sometimes "remove", sometimes "erase", for the same action).
+- One part of speech per word. If you use a word as a noun, do not also use it as a verb: "Apply oil to the valve", not "Oil the valve".
 - Prefer common, concrete verbs and nouns over abstract or formal ones: "use" not "utilize", "start" not "initiate".
 - Spell out an abbreviation or acronym on first use, unless the codebase already treats it as standard vocabulary.
 
@@ -48,8 +54,9 @@ They do not apply to the instruction files in this repository, which use a diffe
 ## Structure
 
 - Break long explanations into short paragraphs or lists rather than long flowing prose.
+- One topic per paragraph, max 6 sentences.
 - State the conclusion or the action first, then the supporting detail, when the two can be separated.
-- Keep warnings, cautions and important notes visually distinct and short.
+- Keep warnings, cautions and important notes visually distinct and short. Open one with the command or the condition, never with the background: "Stop the service before you edit the config", not "Because the config is cached, you must...".
 
 ## Punctuation
 
@@ -84,3 +91,7 @@ Bad:
 Good:
 
 > The retry handler now separates transient failures from permanent ones. A transient failure no longer fails the job.
+
+## Source
+
+ASD-STE100 is a controlled-language standard from the AeroSpace and Defence Industries Association of Europe. It exists because a technician reading a manual cannot ask the author what a sentence means. The official standard, with its ~900-word approved dictionary, is a free download at <https://www.asd-ste100.org/>. This guide applies the principle, not the dictionary.

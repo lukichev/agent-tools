@@ -1,6 +1,6 @@
 # Flutter Code Style Guide
 
-Modern Flutter and Dart patterns and best practices. Reference this on demand from your project's `CLAUDE.md` (e.g. "Before writing or reviewing code in this stack, read `~/.claude/guides/flutter.md`"). Do not `@import` it — that loads the full guide into every session.
+Modern Flutter and Dart patterns and best practices.
 
 ## Tooling
 * **Formatting:** Use the `dart_format` tool to ensure consistent code

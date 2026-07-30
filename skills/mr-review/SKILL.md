@@ -12,25 +12,32 @@ Two checks come from `~/.claude/skills/ready-check/references/`: `ac-coverage.md
 
 Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
 
-Needs `glab` authenticated. Atlassian MCP is optional: without it, skip the ticket steps and note the gap.
+Needs `glab` authenticated. Atlassian MCP is optional.
 
 ## 1. Fetch MR metadata
 
-Parse the MR number from `$ARGUMENTS` (bare number or full URL). In parallel:
+Parse the MR number from `$ARGUMENTS` (bare number or full URL). First, one call:
 
 ```bash
 glab mr view <IID> --output json
-glab api "projects/:fullpath/merge_requests/<IID>/discussions?per_page=100"
-glab api "projects/:fullpath/merge_requests/<IID>/diffs?per_page=100"
-glab api "projects/:fullpath/merge_requests/<IID>/approvals" \
-  | python3 -c "import json,sys; d=json.load(sys.stdin); print({k:d[k] for k in ('approved','approvals_required','approvals_left','approved_by','approval_rules_left')})"
 ```
 
-Keep: `source_branch`, `target_branch`, `author`, `state`, `draft`, `title`, `description`, `changes_count`, `diff_refs.base_sha`, `diff_refs.head_sha`, `detailed_merge_status`, `has_conflicts`, `diverged_commits_count`, `head_pipeline.status`, changed files from `new_path`.
+Keep: `source_branch`, `target_branch`, `author`, `state`, `draft`, `title`, `description`, `changes_count`, `diff_refs.base_sha`, `diff_refs.start_sha`, `diff_refs.head_sha`, `detailed_merge_status`, `has_conflicts`, `diverged_commits_count`, `head_pipeline.status`.
 
-- **Draft: stop.** `draft` true, or a title starting with `Draft:`, cancels the review before the worktree and the agents. Continue only if the user explicitly asked for a draft review.
-- Drop the system notes, per the glab guide. Unfiltered, the output invents prior feedback.
-- The approvals filter cuts an 11 KB payload of avatars down to 5 fields.
+**Draft: stop here.** `draft` true, or a title starting with `Draft:`, cancels the review before anything expensive. Continue only if the user explicitly asked for a draft review.
+
+Past the gate, run these three in parallel. **Filter in the pipe, not in your context** — an unfiltered diffs response carries the full body of every changed file, and you need only the paths:
+
+```bash
+glab api "projects/:fullpath/merge_requests/<IID>/discussions?per_page=100" \
+  | jq '[.[] | select(.notes[0].system | not)]'
+glab api "projects/:fullpath/merge_requests/<IID>/diffs?per_page=100" \
+  | jq '[.[] | {new_path, old_path, renamed_file, deleted_file}]'
+glab api "projects/:fullpath/merge_requests/<IID>/approvals" \
+  | jq '{approved, approvals_required, approvals_left, approved_by, approval_rules_left}'
+```
+
+Each filter matters: the discussions one drops system notes, which otherwise invent prior feedback. The diffs one turns hundreds of KB into a file list. The approvals one cuts an 11 KB payload of avatars down to 5 fields.
 
 ## 2. Check the MR head out in a worktree
 
@@ -83,11 +90,17 @@ Split on leading path segments (`src/_nest/identity`, `apps/portal`). Each revie
 
 ## 5. AC coverage
 
-Read `~/.claude/skills/ready-check/references/ac-coverage.md` with `TICKET` = the 4b output, `DIFF` = `glab mr diff <IID>`, `TREE` = the worktree path. **Report, do not gate.**
+Write the diff to disk once, so steps 5 and 6 share it and neither pulls it into your context:
+
+```bash
+git -C "$WT" diff <base_sha>..<head_sha> > "$WT/../mr-<IID>.diff"
+```
+
+Read `~/.claude/skills/ready-check/references/ac-coverage.md` with `TICKET` = the 4b output, `DIFF` = that file, `TREE` = the worktree path. **Report, do not gate.**
 
 ## 6. Debug artifacts
 
-Read `~/.claude/skills/ready-check/references/debug-artifacts.md` with `DIFF` = `glab mr diff <IID>`.
+Read `~/.claude/skills/ready-check/references/debug-artifacts.md` with `DIFF` = the file from step 5.
 
 ## 7. Hygiene
 
@@ -144,11 +157,7 @@ Blockers <n> · Suggestions <n> · AC <n>/<n> · Debug <clean|n>
 
 ## Cleanup
 
-Keep the worktree, follow-ups need it. `/git-cleanup` leaves `mr-<IID>` trees alone. Do not remove one here, and do not offer to. The user removes a review tree by hand:
-
-```bash
-git worktree remove <path> && git branch -D "mr-<IID>" && git update-ref -d "refs/mr-review/<IID>"
-```
+Keep the worktree, follow-ups need it. `/git-cleanup` leaves `mr-<IID>` trees alone and prints the command to remove one by hand. Do not remove it here, and do not offer to.
 
 ## Rules
 
@@ -156,4 +165,3 @@ git worktree remove <path> && git branch -D "mr-<IID>" && git update-ref -d "ref
 - **Never gate on findings.** This is someone else's work, so report every block, failures included. The step 1 draft check is the only stop.
 - **All diff analysis happens in the agents.** Never review the diff in the main context.
 - Treat the description as claims to verify. Skip style that is not a project standard.
-- No Atlassian MCP or no ticket ID: run the rest, note the gap in the verdict line.

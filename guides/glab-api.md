@@ -1,6 +1,6 @@
 # glab and GitLab API Reference
 
-Shared by `git-rebase`, `git-rebase-all`, `mr-review`, `mr-status-check` and `mr-create`. Every item here is a rule that produces a wrong result when you ignore it.
+Shared by `git-rebase`, `git-rebase-all`, `mr-review`, `mr-status-check` and `mr-comment`. Every item here is a rule that produces a wrong result when you ignore it.
 
 `glab` is not `gh`. The flags differ.
 

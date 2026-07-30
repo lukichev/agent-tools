@@ -24,29 +24,33 @@ If no open MRs, inform the user and stop.
 
 ### 2. Fetch Details Per MR
 
-For each MR, fetch additional data in parallel where possible:
+Issue the calls for **every** MR in one message, so they run together. Filter each in the pipe — the raw responses carry descriptions, diff refs and author objects you do not use.
 
-**Pipeline status** (not in list output):
+**Pipeline status and merge status** (not in list output):
 ```bash
-glab mr view <iid> --output json
+glab mr view <iid> --output json \
+  | jq '{pipeline: .head_pipeline.status, merge: .detailed_merge_status}'
 ```
-Extract `head_pipeline.status` (`success`, `failed`, `running`, `pending`, `manual`, `canceled`, `null`).
+`pipeline` is `success`, `failed`, `running`, `pending`, `manual`, `canceled` or `null`.
 
 **Unresolved discussions**:
 ```bash
-glab api "projects/:fullpath/merge_requests/<iid>/discussions?per_page=100"
+glab api "projects/:fullpath/merge_requests/<iid>/discussions?per_page=100" \
+  | jq '[.[] | select(.notes[0].system | not)
+              | select(.notes[0].resolvable and (.notes[0].resolved | not))
+              | {author: .notes[0].author.username, path: .notes[0].position.new_path,
+                 line: .notes[0].position.new_line, body: .notes[0].body[:100]}]'
 ```
+The `system` filter is required, per the glab guide. Count what remains.
 
-Drop the system notes, then count threads where `notes[0].resolvable == true && notes[0].resolved == false`. Also extract the first line of each unresolved comment for the summary.
+**Rebase needed** — map `detailed_merge_status` per the glab guide. Take it from the single-MR GET in step 2, never from the list response.
 
-**Rebase needed** — read `detailed_merge_status` from the single-MR GET in step 2, not from the list response:
-- `conflict` → needs rebase (conflicts), and a local worktree rebase
-- `need_rebase` → needs rebase (behind target), server-side is safe
-- Otherwise → up to date
-
-**Divergence from target** — count commits on target that aren't in source:
+**Divergence from target** — fetch every branch once, before the loop, not once per MR:
 ```bash
-git fetch origin <target_branch> <source_branch> 2>/dev/null
+git fetch origin <all-source-and-target-branches> 2>/dev/null
+```
+Then, per MR, count commits on target that aren't in source:
+```bash
 git rev-list --count origin/<source_branch>..origin/<target_branch>
 ```
 This gives the number of commits the source branch is **behind** the target. Display as `N behind` (e.g. `12 behind`, or `up to date` if 0).
@@ -113,6 +117,6 @@ Include every open MR in the JSON (even `ready` ones) — `/git-rebase-all` need
 ## Rules
 
 - **Read-only** — never modify MRs, push, or rebase
-- Fetch MR details in parallel to minimize latency
+- Issue the per-MR calls for every MR in one message, not one MR at a time
 - Truncate long titles to 40 chars in the table
 - Sort MRs: needs attention first, then waiting, then ready

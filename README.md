@@ -18,19 +18,13 @@ cp -r /path/to/agent-tools/{agents,skills} /your-project/.claude/
 **The global symlinks are required, not optional.** Skills read each other by absolute path (`mr-review` reads `~/.claude/skills/ready-check/references/`, `git-publish` reads `~/.claude/skills/git-commit/`), and agents read guides the same way. Without these, those steps fail:
 
 ```bash
-ln -s /path/to/agent-tools/skills  ~/.claude/skills
-ln -s /path/to/agent-tools/agents  ~/.claude/agents
-ln -s /path/to/agent-tools/guides  ~/.claude/guides
-```
-
-For code style guides, symlink them globally (agents like `code-reviewer` expect `~/.claude/guides/`):
-
-```bash
-ln -s /path/to/agent-tools/guides/ ~/.claude/guides
+ln -s /path/to/agent-tools/skills        ~/.claude/skills
+ln -s /path/to/agent-tools/agents        ~/.claude/agents
+ln -s /path/to/agent-tools/guides        ~/.claude/guides
 ln -s /path/to/agent-tools/output-styles ~/.claude/output-styles
 ```
 
-Then reference them **on demand** from your project's `CLAUDE.md` — do NOT `@import` them. An `@import` loads the full guide (2–7k tokens) into every session, even ones that never touch code. A pointer line costs nothing until the guide is actually needed:
+Reference the guides **on demand** from your project's `CLAUDE.md` — do NOT `@import` them. An `@import` loads the full guide (2–7k tokens) into every session, even ones that never touch code. A pointer line costs nothing until the guide is actually needed:
 
 ```markdown
 ## Code Style
@@ -104,20 +98,15 @@ Referenced on demand (see Usage) — never `@import`ed into `CLAUDE.md`.
 | Python 3.10+ | `~/.claude/guides/python.md` |
 | Flutter / Dart | `~/.claude/guides/flutter.md` |
 | ASD-STE100 writing | `~/.claude/guides/asd-ste100.md` |
+| glab / GitLab API | `~/.claude/guides/glab-api.md` |
 
 ### ASD-STE100 writing guide
 
-`guides/asd-ste100.md` holds the prose rules for MR descriptions, MR comments, Jira tickets, commit messages, agent reports and documentation. All 6 agents read it on demand, as do the `git-commit`, `mr-comment`, `mr-create`, `mr-review` and `jira-create` skills. Skills that only run commands or edit code do not.
+`guides/asd-ste100.md` holds the prose rules for MR descriptions, MR comments, Jira tickets, commit messages, agent reports and documentation. All 6 agents read it on demand, as do the skills that produce a commit, an MR, a ticket or a comment. Skills that only run commands or edit code do not.
 
 The rules apply to prose these tools generate. They do not apply to the repo's own instruction files.
 
-The same file doubles as an output style, which applies the rules to a whole session. `output-styles/asd-ste100.md` is a relative symlink to the guide, so both roles read one file. Symlink the directory:
-
-```bash
-ln -s /path/to/agent-tools/output-styles ~/.claude/output-styles
-```
-
-Then select it with `/output-style`. To apply the rules without the output style, add a pointer line to your `CLAUDE.md`.
+The same file doubles as an output style, which applies the rules to a whole session. `output-styles/asd-ste100.md` is a relative symlink to the guide, so both roles read one file. Once the directory is symlinked (see Usage), select it with `/config` → **Output style**.
 
 ## Helpful Links
 

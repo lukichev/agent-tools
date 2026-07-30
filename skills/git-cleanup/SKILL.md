@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Reclaim local git state after merges. The guiding principle: **deleting is easy, recovering is not** — so verify before removing, and never destroy unrecoverable work (stashes, unmerged branches) without explicit sign-off. Always finish with a summary of what was pruned, converted, deleted, and left alone — and why.
 
-Protected refs are never touched: the **current branch**, the repo's **default branch** (`main`/`master`), and `production`. Read the project's `CLAUDE.md` for any additional protected branch names before starting.
+Protected refs are never touched: the **current branch**, the repo's **default branch** (`main`/`master`), `production`, and `mr-<IID>` review worktrees with their branches and `refs/mr-review/<IID>` refs. Read the project's `CLAUDE.md` for any additional protected branch names before starting.
 
 ## Setup
 

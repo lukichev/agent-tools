@@ -60,11 +60,6 @@ Parse the JSON and extract `target_branch` and `iid` from the first result. `<ii
 
 Tell the user which target branch was detected and why.
 
-Priority for determining the target branch:
-1. Explicit argument from the user (highest priority)
-2. Target branch of an existing MR for the source branch
-3. Fall back to `main`
-
 ### 3. Set Up Worktree (worktree mode only)
 
 Branch names can contain `/` (e.g. `feat/foo`), which would break a path like `/tmp/rebase-feat/foo`. Sanitize the branch name for the path by replacing `/` with `-`:
@@ -161,8 +156,7 @@ If the rebase was aborted (hopeless conflicts), clean up the worktree too.
 If an MR exists and its target branch differs from the rebase target:
 
 ```bash
-glab mr list --source-branch <source-branch>
-glab mr update <MR-NUMBER> --target-branch <target>
+glab mr update <iid> --target-branch <target>
 ```
 
 ## Error Recovery

@@ -9,6 +9,8 @@ disable-model-invocation: true
 
 Post review suggestions as inline diff threads on a GitLab merge request. Designed to be used after `/mr-review` has produced numbered suggestions.
 
+Read `~/.claude/guides/glab-api.md` before you call `glab`.
+
 ## Prerequisites
 
 - `glab` CLI installed and authenticated
@@ -23,7 +25,7 @@ Post review suggestions as inline diff threads on a GitLab merge request. Design
 
 ### 2. Get Diff Refs
 
-Fetch the MR's diff refs needed for positioning inline comments:
+Reuse the `diff_refs` from a `/mr-review` in this conversation. Fetch them only when they are absent:
 
 ```bash
 glab api "projects/:fullpath/merge_requests/<MR_IID>" | jq '.diff_refs'
@@ -105,11 +107,7 @@ Add a short code block only when the fix is hard to state in words.
 
 ### Example
 
-Bad:
-
-> I might be missing something here, but it seems like this could potentially be problematic — the token isn't being validated before it gets used downstream, which under the hood means a malformed token would essentially just flow straight through to the client. Maybe consider adding some validation? Happy to discuss!
-
-Good:
+The guide has the Bad case. This shows the three parts:
 
 > The code uses the token before it validates the token. A malformed token reaches the client.
 >

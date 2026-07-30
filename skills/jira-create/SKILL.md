@@ -103,7 +103,7 @@ Good:
 
 ## Important
 
-- If an MR already exists for the changes, append the new ticket ID to the MR description. Never replace the title or the description — see `/mr-create` rules.
+- If an MR already exists for the changes, append the new ticket ID to its description per `/mr-create`.
 
 ## Related Skills
 

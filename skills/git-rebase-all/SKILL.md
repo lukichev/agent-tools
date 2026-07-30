@@ -95,7 +95,7 @@ git branch -D worktree-agent-*        # delete leftover tracking branches
 git worktree prune
 ```
 
-Then run `/git-cleanup` to prune remote-tracking refs and delete local branches whose MRs have merged — it verifies content actually landed before deleting (survives squash-merges), unlike a raw `: gone]` sweep.
+Then run the prune and merged-branch steps of `/git-cleanup` (its steps 2 and 4). It verifies content actually landed before deleting, so it survives squash-merges, unlike a raw `: gone]` sweep. Skip its stash review, which blocks on a user prompt.
 
 ## Rules
 

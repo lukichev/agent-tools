@@ -33,6 +33,8 @@ Stage files and create a conventional commit. See `/git-commit` for format rules
 
 Push the branch to remote. Creates a feature branch from main if needed. See `/git-push` for rules.
 
+Give the step 1 answers to every child step. A child skips its own `AskUserQuestion` for any value it already has.
+
 ### 4. Create or Update MR (`/mr-create`)
 
 Check if an MR already exists for the current branch. If it does, skip MR creation — only offer to update the MR description if the user explicitly requests it. See `/mr-create` for rules.

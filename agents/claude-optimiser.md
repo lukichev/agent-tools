@@ -22,9 +22,9 @@ Read: `CLAUDE.md` at project root, `~/.claude/CLAUDE.md` (global), and any neste
 **Check for:**
 - **Tiered context architecture** — CLAUDE.md should follow a 3-tier approach:
   - **Tier 1 (always loaded, first 200 lines):** project name, critical rules, quick-start commands, troubleshooting table. Target: <800 tokens.
-  - **Tier 2 (on demand):** component-specific docs, API references, deployment guides. Linked from CLAUDE.md via `docs/` or `@import`. Target: 500–1,500 tokens per doc.
+  - **Tier 2 (on demand):** component-specific docs, API references, deployment guides. Linked from CLAUDE.md by a pointer line that names the path and says when to read it. Target: 500–1,500 tokens per doc.
   - **Tier 3 (never loaded):** complete API specs, changelogs, generated docs. Referenced by path only.
-- Size: first 200 lines should contain all critical info. Over 200 lines = detail should be extracted to linked docs. Estimate: `wc -w CLAUDE.md | awk '{print $1 * 0.75}'` for rough token count.
+- Size: first 200 lines should contain all critical info. Over 200 lines = detail should be extracted to linked docs. Estimate the token count with the command in Measurement Targets.
 - Litmus test each line: "Would Claude make a mistake without this?" If no → cut.
 - Redundancy with MEMORY.md or agent memory files.
 - Information that exists in code docstrings (don't duplicate).
@@ -44,7 +44,7 @@ Read: `CLAUDE.md` at project root, `~/.claude/CLAUDE.md` (global), and any neste
 
 ### 2. Memory Files Review
 
-Read: All files in `.claude/projects/*/memory/` and `.claude/agent-memory/`.
+Read: all files in `.claude/agent-memory/`.
 
 **Check for:**
 - Overlap with CLAUDE.md (memory = discoveries, not docs).
