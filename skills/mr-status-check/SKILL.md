@@ -8,6 +8,8 @@ context: fork
 
 Dashboard view of all your open MRs — comments, pipeline, rebase status, merge readiness.
 
+Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
+
 ## Workflow
 
 ### 1. Fetch All Open MRs
@@ -35,22 +37,14 @@ Extract `head_pipeline.status` (`success`, `failed`, `running`, `pending`, `manu
 glab api "projects/:fullpath/merge_requests/<iid>/discussions?per_page=100"
 ```
 
-**Drop every note where `system == true` before you count anything.** GitLab returns activity entries ("changed the description", "added 1 commit") as discussions. They are not review feedback, and an MR can consist entirely of them.
+Drop the system notes, then count threads where `notes[0].resolvable == true && notes[0].resolved == false`. Also extract the first line of each unresolved comment for the summary.
 
-From what remains, count threads where `notes[0].resolvable == true && notes[0].resolved == false`. Also extract the first line of each unresolved comment for the summary.
-
-`per_page=100` is required. The default page size is 20, so a busy MR silently truncates.
-
-**Rebase needed** — determine from `has_conflicts` and `detailed_merge_status`:
-- `has_conflicts: true` → needs rebase (conflicts)
-- `detailed_merge_status: "need_rebase"` → needs rebase (behind target)
+**Rebase needed** — read `detailed_merge_status` from the single-MR GET in step 2, not from the list response:
+- `conflict` → needs rebase (conflicts), and a local worktree rebase
+- `need_rebase` → needs rebase (behind target), server-side is safe
 - Otherwise → up to date
 
-**Divergence from target** — how far source branch has drifted from its target:
-```bash
-glab api "projects/:fullpath/merge_requests/<iid>" --jq '.diff_refs.base_sha'
-```
-Then count commits on target that aren't in source:
+**Divergence from target** — count commits on target that aren't in source:
 ```bash
 git fetch origin <target_branch> <source_branch> 2>/dev/null
 git rev-list --count origin/<source_branch>..origin/<target_branch>
@@ -62,17 +56,18 @@ This gives the number of commits the source branch is **behind** the target. Dis
 ```
 | MR    | Title                          | Pipeline | Comments     | Rebase | Behind   | Status          |
 |-------|--------------------------------|----------|--------------|--------|----------|-----------------|
-| !123  | feat(auth): add SSO, DOC-1234  | passed   | 2 unresolved | needed | 34       | needs attention |
-| !124  | fix(billing): prorate, DOC-5678| running  | none         | ok     | 12       | waiting         |
-| !125  | refactor(deps): luxon, DOC-9175| manual   | none         | ok     | 0        | ready           |
+| !123  | feat(auth): add SSO, PROJ-1234  | passed   | 2 unresolved | needed | 34       | needs attention |
+| !124  | fix(billing): prorate, PROJ-5678| running  | none         | ok     | 12       | waiting         |
+| !125  | refactor(deps): luxon, PROJ-9175| manual   | none         | ok     | 0        | ready           |
 ```
 
-**Status column logic:**
-- `needs attention` — has unresolved comments OR has conflicts OR behind > 0
-- `blocked` — pipeline failed
-- `waiting` — pipeline running/pending
-- `ready` — pipeline passed (or manual), no unresolved comments, no rebase needed, **behind == 0**
-- `draft` — MR is marked as draft
+**Status column logic.** These overlap, so evaluate in this order and take the first match:
+
+1. `draft` — MR is marked as draft
+2. `blocked` — pipeline failed
+3. `needs attention` — unresolved comments, or conflicts, or behind > 0
+4. `waiting` — pipeline running or pending
+5. `ready` — pipeline passed or manual, no unresolved comments, no rebase needed, **behind == 0**
 
 A branch that is behind its target is **not mergeable** — it must be rebased first.
 
@@ -99,8 +94,8 @@ This skill runs in a forked context — only the final message reaches the calle
 [
   {
     "iid": 123,
-    "title": "feat(auth): add SSO, DOC-1234",
-    "source_branch": "DOC-1234",
+    "title": "feat(auth): add SSO, PROJ-1234",
+    "source_branch": "PROJ-1234",
     "target_branch": "main",
     "pipeline": "success",
     "unresolved_comments": 2,

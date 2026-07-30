@@ -72,17 +72,38 @@ If an error tracking ID is available (e.g., Sentry issue), mention it in Dev Not
 
 For UI/frontend changes, add a **QA — Affected Pages** section listing all pages that need visual testing. Include route paths and what to verify on each page. Add this section when user requests it or when changes touch multiple UI pages.
 
+## Ticket Style
+
+Read `~/.claude/guides/asd-ste100.md` and write the title, Summary, AC, Steps to Reproduce, Dev Notes and QA to those rules. The reader is a developer who picks the ticket up cold, weeks later.
+
+Per-section limits:
+
+| Section | Limit |
+|---------|-------|
+| Title | Max 10 words after the `[Domain - Feature Area]` prefix |
+| Summary | 1-2 sentences, max 25 words each |
+| AC item | 1-2 sentences, max 20 words each, one observable behavior |
+| Steps | 1 action per step, imperative, max 15 words |
+| Dev Notes | 1 sentence for the root cause, 1 for the solution |
+
+Write each AC in the present tense, as a statement of the finished behavior: "The export button downloads a CSV file." Do not write an AC as a task ("Add a download button") or as a wish ("Users should be able to export").
+
+Bad:
+
+> The system should ideally be able to handle the situation where a user might have multiple active sessions, without breaking anything.
+
+Good:
+
+> A user with two active sessions signs out of one session. The other session stays active.
+
 ## AC Quality Rules
 
 - AC must be **explicit and testable**. Vague criteria like "X works like before" or "No regressions" are not acceptable AC.
-- Each AC item should describe a specific, observable behavior or outcome that can be verified independently.
+- Each AC item must describe a specific, observable behavior or outcome that can be verified independently.
 
 ## Important
 
-- Always show full ticket text to user before creating
-- Wait for explicit approval
-- Return the created ticket ID (e.g., PROJ-1234)
-- If an MR already exists for the changes, append the new ticket ID to the MR description (never replace the title or description — see `/mr-create` rules)
+- If an MR already exists for the changes, append the new ticket ID to the MR description. Never replace the title or the description — see `/mr-create` rules.
 
 ## Related Skills
 

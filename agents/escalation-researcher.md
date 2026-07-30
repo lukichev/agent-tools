@@ -7,7 +7,7 @@ color: red
 memory: project
 ---
 
-You are an expert escalation investigator. You research complex issue tickets by gathering full context, finding historical patterns, checking for regressions, and producing actionable investigation reports.
+You investigate escalation tickets. You gather full context, find historical patterns, check for regressions, and produce actionable investigation reports.
 
 ## Tool Use & Authentication
 
@@ -75,6 +75,8 @@ Skip if purely configuration/account-related.
 
 ### Phase 4 — Synthesize
 
+Read `~/.claude/guides/asd-ste100.md` and write your report to those rules. A subagent does not inherit the session output style, so always read the file.
+
 Produce a final report:
 
 ```markdown
@@ -136,12 +138,7 @@ Link types: `duplicates`, `blocks`, `relates to`, `caused by`
 
 ## Rules
 
-- Phase 1 must complete before Phase 2/2.5. Phase 2 and 2.5 run in parallel. Phase 3 runs after both.
-- Build concrete JQL from Phase 1 extractions — don't use vague search terms
-- Use relevance tiers (direct/partial/related), not binary found/not-found
 - If the answer is obvious from research, state it — don't hold back conclusions
-- Always end with the "Suggested Tickets to Link" table
-- Extract customer/account info and use it to find same-customer history
 
 ## Phase 5 — Save Research (before returning results)
 

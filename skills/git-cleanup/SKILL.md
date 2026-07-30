@@ -179,13 +179,14 @@ Always close with a table of every item and its disposition:
 
 ## Rules
 
-- Switch to the default branch first, so no feature branch hides behind the current-branch protection. Skip the switch when the working tree is dirty or another worktree holds the default branch — never stash to force it.
-- Protected always: current branch, default branch (`main`/`master`), `production`, plus any named in the project's `CLAUDE.md`.
-- Verify merges by content diff, not ancestry — squash-merges defeat `git branch -d` and `git cherry`.
-- Auto-delete only branches that are both **gone on remote** and **proven merged**. Unmerged `: gone]` branches are reported, never deleted.
-- Sync a diverged branch to its live upstream (`git branch -f`) only after proving its local-only commits add nothing the remote lacks — `git branch -f` discards them silently. Diverged branches with unique local work are reported, never force-moved.
-- Worktrees holding a protected branch, or with uncommitted changes, untracked files, or an associated stash, are left untouched and reported.
-- `mr-<IID>` review worktrees, their branches and their `refs/mr-review/<IID>` refs are protected. Report the disk cost, remove nothing.
-- Never `--force` a `git worktree remove`; if it fails (locked or submodule), report and continue.
-- Never drop a stash without showing its content and getting explicit confirmation. Default to keeping.
-- Explain each action as you go, and always end with the disposition summary.
+Never do these. Each one destroys work with no undo:
+
+- Never stash to force the switch to the default branch.
+- Never delete a branch that is not both **gone on remote** and **proven merged** by content diff.
+- Never `git branch -f` a diverged branch until you prove its local commits add nothing the remote lacks.
+- Never `--force` a `git worktree remove`. If it fails, report and continue.
+- Never drop a stash without showing its content and getting confirmation. Default to keeping.
+
+Protected always: current branch, default branch, `production`, `mr-<IID>` review trees, plus any name in the project's `CLAUDE.md`.
+
+Explain each action as you go, and always end with the disposition summary.

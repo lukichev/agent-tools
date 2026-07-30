@@ -41,7 +41,7 @@ glab auth status -t 2>&1 | grep "Token:"
 
 ### 4. Write the Comment Text
 
-Write every comment body in ASD-STE100 (Simplified Technical English). See [Comment Style](#comment-style) for the rules. Keep each comment under 40 words.
+Write every comment body in ASD-STE100. See [Comment Style](#comment-style).
 
 ### 5. Post Each Comment
 
@@ -86,53 +86,34 @@ Posted 3 inline comments to MR !42:
 
 ## Comment Style
 
-Write each comment body in ASD-STE100 (Simplified Technical English). The reader is a busy engineer who wants the problem and the fix, nothing else.
+Read `~/.claude/guides/asd-ste100.md` and write every comment body to those rules. The reader is a busy engineer who wants the problem and the fix, nothing else.
 
 ### Structure
 
-Two parts, in this order:
+Three parts, in this order:
 
 1. **The problem** — one sentence. What is wrong at this line.
-2. **The fix** — one sentence, in the imperative. What to do.
+2. **The consequence** — one sentence. What breaks as a result. Omit when the problem already states it.
+3. **The fix** — one sentence, in the imperative. What to do.
 
-Add a short code block only when the fix is hard to state in words. Never add a preamble, a compliment, or a closing question.
+Add a short code block only when the fix is hard to state in words.
 
-### Rules
+### Length
 
-- Max 40 words per comment. Max 2 sentences of prose.
-- Max 20 words per sentence. One idea per sentence.
-- Use active voice: "The guard skips the check", not "The check is skipped by the guard".
-- Use simple present tense. Avoid "will have been", "would have", "having done".
-- Use the imperative for the fix: "Move the check into the service."
-- Use "must" for a requirement. Never use "should", "may", "might", "consider", "perhaps", or "it would be nice".
-- One word, one meaning. Reuse the same term for the same thing.
-- No gerunds as nouns: "to validate the payload", not "validating the payload".
-- Noun clusters: 3 words maximum.
-- Keep the articles "a" and "the".
-- No idioms, no hedging, no filler: drop "essentially", "basically", "under the hood", "just", "simply", "I think", "it seems".
-- Use a plain hyphen. Never an em dash or an en dash.
+- Max 40 words per comment in total, across all three parts.
+- Max 3 sentences of prose, one per part.
 
-### Examples
+### Example
 
 Bad:
 
-> I might be missing something here, but it seems like this could potentially be problematic — the token isn't being validated before it gets used downstream, which under the hood means a malformed token would essentially just flow straight through to the fax provider client. Maybe consider adding some validation? Happy to discuss!
+> I might be missing something here, but it seems like this could potentially be problematic — the token isn't being validated before it gets used downstream, which under the hood means a malformed token would essentially just flow straight through to the client. Maybe consider adding some validation? Happy to discuss!
 
 Good:
 
-> The code uses the token before it validates the token. A malformed token reaches the fax provider client.
+> The code uses the token before it validates the token. A malformed token reaches the client.
 >
 > Validate the token here, before line 47.
-
-Bad:
-
-> Nice work on this! One small nit: it would be nice if we could maybe extract this into a helper, since we're kind of duplicating the same logic that already exists in `parseFaxStatus`.
-
-Good:
-
-> This logic duplicates `parseFaxStatus` in `fax-status.util.ts:12`.
->
-> Call the existing helper.
 
 ## Line Positioning Rules
 
@@ -147,7 +128,5 @@ Good:
 
 ## Rules
 
-- **Never post comments automatically** — only post what the user explicitly selected
-- Only post comments the user chose — nothing extra
+- **Never post comments automatically** — only post what the user explicitly selected, nothing extra
 - If a comment fails to post as `DiffNote`, warn the user and skip it rather than posting as a general comment
-- Write every comment body in ASD-STE100. See [Comment Style](#comment-style)

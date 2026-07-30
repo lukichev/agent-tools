@@ -13,8 +13,10 @@ This file does **not** decide what happens next. The caller owns any gating.
 ## Scan
 
 ```bash
-<DIFF> | grep -nE "^\+.*(console\.log|console\.debug|debugger|\.only\(|\.skip\(|// *TODO|// *FIXME|// *HACK|// *temp|XXX|dd\(\)|binding\.pry|print\()"
+<DIFF> | grep -E "^(\+\+\+|@@|\+.*(console\.log|console\.debug|debugger|\.only\(|\.skip\(|// *TODO|// *FIXME|// *HACK|// *temp|XXX|dd\(\)|binding\.pry|print\())"
 ```
+
+Keep the `+++` and `@@` lines: they carry the file name and the hunk start. `grep -n` over a diff returns the position in the stream, not the line in the file, so never report that number. Track the current file from the last `+++ b/<path>`, and the line from the hunk header `@@ -a,b +c,d @@`, counting added and context lines from `c`.
 
 Rules:
 

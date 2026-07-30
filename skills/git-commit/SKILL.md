@@ -26,6 +26,8 @@ Stage changed files and create a commit with a conventional commit message.
 
 ## Commit Message Format
 
+Read `~/.claude/guides/asd-ste100.md` and write the subject and the body to those rules.
+
 ```
 type(scope): description, TICKET-ID
 
@@ -42,15 +44,17 @@ type(scope): description, TICKET-ID
 
 ## Types & Examples
 
-| Type | When to use | Example |
-|------|-------------|---------|
-| `fix` | Bug fixes | `fix(auth): handle session expiry race condition, PROJ-1234` |
-| `feat` | New features | `feat(api.users): add email verification, PROJ-1234` |
-| `refactor` | Code restructuring without behavior change | `refactor(billing): simplify subscription state machine, PROJ-5678` |
-| `docs` | Documentation only | `docs(readme): update deployment instructions` |
-| `test` | Adding/updating tests | `test(auth): add token expiry edge case tests, PROJ-1234` |
-| `chore` | Maintenance, dependencies, configs | `chore(deps): update framework dependencies to v10, PROJ-9999` |
-| `revert` | Reverting previous changes | `revert(auth): revert session cookie domain change, PROJ-8784` |
+| Type | Example |
+|------|---------|
+| `fix` | `fix(auth): handle session expiry race condition, PROJ-1234` |
+| `feat` | `feat(api.users): add email verification, PROJ-1234` |
+| `refactor` | `refactor(billing): simplify subscription state machine, PROJ-5678` |
+| `docs` | `docs(readme): update deployment instructions` |
+| `test` | `test(auth): add token expiry edge case tests, PROJ-1234` |
+| `chore` | `chore(deps): update framework dependencies to v10, PROJ-9999` |
+| `revert` | `revert(auth): revert session cookie domain change, PROJ-8784` |
+
+`refactor` means no behavior change. Everything else is standard conventional-commit.
 
 ## Scope
 

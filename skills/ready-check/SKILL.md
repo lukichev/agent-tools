@@ -71,8 +71,6 @@ Code Review:      ✅ No blockers / ⚠️ N suggestions
 
 ## Rules
 
-- Never auto-proceed past a ⚠️ AC — always ask the user first
-- Don't run code review if ACs have ❌ items (no point reviewing incomplete work)
-- Keep the summary tight — details are in the sections above it
-- If no ticket ID can be found, skip steps 3–4 and note it in the summary
-- If Atlassian MCP is not configured, skip steps 3–4 and note it in the summary
+- Never auto-proceed past a ⚠️ or ❌ AC — always ask the user first
+- Skip the code review only when the user declines to continue past a ❌
+- If no ticket ID can be found, or Atlassian MCP is not configured, skip steps 3-4 and note it in the summary

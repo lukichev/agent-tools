@@ -8,6 +8,8 @@ argument-hint: "<source-branch> [onto <target-branch>]"
 
 Rebase a feature branch onto its target branch. Auto-detects the target from the existing MR, falls back to `main`. Detects and handles the squash-merge scenario where a parent branch was squash-merged into the target.
 
+Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
+
 Works in two modes:
 - **In-place** — when already on the branch to rebase
 - **Worktree** — when on a different branch (creates a temporary worktree, keeps the current directory untouched)
@@ -51,7 +53,7 @@ If the user specified a target branch explicitly, use that. Otherwise, auto-dete
 glab mr list --source-branch <source-branch> --output json 2>/dev/null
 ```
 
-Parse the JSON and extract `target_branch` from the first result.
+Parse the JSON and extract `target_branch` and `iid` from the first result. `<iid>` below means that value.
 
 - If an MR exists, use its `target_branch` as the rebase target.
 - If no MR exists or the command fails, fall back to `main`.
@@ -62,21 +64,6 @@ Priority for determining the target branch:
 1. Explicit argument from the user (highest priority)
 2. Target branch of an existing MR for the source branch
 3. Fall back to `main`
-
-### 2b. Authoritative Merge Status (avoid the `unchecked` trap)
-
-`glab mr list` returns *cached* mergeability — often `detailed_merge_status: "unchecked"` with a meaningless `has_conflicts: false`. To force GitLab's lazy recompute, hit the **single-MR GET** endpoint and poll until the status leaves `unchecked`/`checking`:
-
-```bash
-while :; do
-  dms=$(glab api "projects/:fullpath/merge_requests/<iid>" \
-    | python3 -c "import json,sys;print(json.load(sys.stdin)['detailed_merge_status'])")
-  [ "$dms" != unchecked ] && [ "$dms" != checking ] && break
-  sleep 3
-done
-```
-
-Key off `detailed_merge_status` (not `has_conflicts`): `conflict` (or `merge_status: "cannot_be_merged"`) means a **local worktree rebase is required, not server-side**; `need_rebase` and the clean states are safe server-side. Gotcha: `glab --jq` may return empty — pipe raw JSON to `python3`/`jq`. The consumer that must act on this is `git-rebase-all` / `mr-status-check`.
 
 ### 3. Set Up Worktree (worktree mode only)
 

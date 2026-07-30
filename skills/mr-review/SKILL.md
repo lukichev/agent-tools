@@ -10,6 +10,8 @@ Review a merge request end to end, read-only. Mostly used on **other people's MR
 
 Two checks come from `~/.claude/skills/ready-check/references/`: `ac-coverage.md` and `debug-artifacts.md`. Read them where the steps say so. Never read `ready-check/SKILL.md` itself, it reads the local tree and gates on the user.
 
+Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
+
 Needs `glab` authenticated. Atlassian MCP is optional: without it, skip the ticket steps and note the gap.
 
 ## 1. Fetch MR metadata
@@ -27,9 +29,8 @@ glab api "projects/:fullpath/merge_requests/<IID>/approvals" \
 Keep: `source_branch`, `target_branch`, `author`, `state`, `draft`, `title`, `description`, `changes_count`, `diff_refs.base_sha`, `diff_refs.head_sha`, `detailed_merge_status`, `has_conflicts`, `diverged_commits_count`, `head_pipeline.status`, changed files from `new_path`.
 
 - **Draft: stop.** `draft` true, or a title starting with `Draft:`, cancels the review before the worktree and the agents. Continue only if the user explicitly asked for a draft review.
-- **Drop notes where `system == true`.** GitLab returns activity entries as discussions, and an MR can be nothing but those (!7000 is 7 of 7). Unfiltered, the output invents prior feedback.
-- `per_page=100` is required, the default is 20. The approvals filter cuts an 11 KB payload of avatars down to 5 fields.
-- `glab mr diff <IID>` prints the diff and has **no** `--name-only`. The file list comes from the diffs API.
+- Drop the system notes, per the glab guide. Unfiltered, the output invents prior feedback.
+- The approvals filter cuts an 11 KB payload of avatars down to 5 fields.
 
 ## 2. Check the MR head out in a worktree
 
@@ -82,17 +83,19 @@ Split on leading path segments (`src/_nest/identity`, `apps/portal`). Each revie
 
 ## 5. AC coverage
 
-Read `ready-check/references/ac-coverage.md` with `TICKET` = the 4b output, `DIFF` = `glab mr diff <IID>`, `TREE` = the worktree path. **Report, do not gate.**
+Read `~/.claude/skills/ready-check/references/ac-coverage.md` with `TICKET` = the 4b output, `DIFF` = `glab mr diff <IID>`, `TREE` = the worktree path. **Report, do not gate.**
 
 ## 6. Debug artifacts
 
-Read `ready-check/references/debug-artifacts.md` with `DIFF` = `glab mr diff <IID>`.
+Read `~/.claude/skills/ready-check/references/debug-artifacts.md` with `DIFF` = `glab mr diff <IID>`.
 
 ## 7. Hygiene
 
 From step 1 data only. Do not re-fetch.
 
 ## Output
+
+Read `~/.claude/guides/asd-ste100.md` and write every line to those rules. A finding here is the same content `/mr-comment` posts, so it must already read as a postable comment.
 
 Terse: tables and lists, no prose, no preamble, no closing paragraph, no restatement of the description. These blocks, nothing else.
 

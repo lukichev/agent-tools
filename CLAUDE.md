@@ -1,21 +1,23 @@
 # agent-tools
 
-Reusable toolkit of Claude Code agents, skills, and code style guides. Designed to be symlinked into any project's `.claude/` folder.
+Reusable toolkit of Claude Code agents, skills and guides. Symlinked into any project's `.claude/` folder, and globally into `~/.claude/`.
 
 ## Structure
 
 - `agents/` — 6 agents (code-reviewer, logic-reviewer, session-reflector, atlassian-researcher, escalation-researcher, claude-optimiser)
-- `skills/` — 18 skills (git-commit, git-push, git-publish, git-rebase, git-rebase-all, git-cleanup, git-start, mr-create, mr-review, mr-comment, mr-status-check, ready-check, reflect, jira-create, atlassian-research, escalation-research, postman-export, skill-create)
-- `guides/` — Code style guides (Angular 21, NestJS, Python 3.10+, Flutter/Dart), read on demand via a pointer line in the target project's `CLAUDE.md` (never `@import` — that loads the full guide every session)
+- `skills/` — 18 skills, `git-` prefix for git, `mr-` prefix for merge requests
+- `guides/` — code style guides (Angular 21, NestJS, Python 3.10+, Flutter/Dart), the ASD-STE100 writing guide, and the `glab` API guide. Read on demand via a pointer line, never `@import` — an import loads the full guide every session
+- `output-styles/asd-ste100.md` — a relative symlink to `guides/asd-ste100.md`, so the output style and the reference cannot drift
+
+## Writing style
+
+A skill or agent that produces an artifact published outside the session — a commit, an MR, a ticket, a comment, an agent report — points at `~/.claude/guides/asd-ste100.md` and must not restate the rules. It may add limits specific to its artifact, such as a word cap. A skill that only runs commands or edits code needs no pointer.
+
+Each agent carries its own pointer line even though a subagent does load `~/.claude/CLAUDE.md`. Two reasons: a subagent does not inherit the session output style, and this repo ships `agents/` but not the user's global `CLAUDE.md`.
 
 ## Rules
 
-- **All skills and agents must be project-agnostic.** They must not hard-code project names, repo paths, team conventions, or domain-specific logic. Any project-specific context must be read from the target project's `CLAUDE.md` at runtime.
-
-## Conventions
-
-- Agents and skills are project-agnostic — they read the target project's `CLAUDE.md` for context
-- Skills that delegate to agents should be thin (< 15 lines of body)
-- Agent description examples use consistent verb: "I'll use the [agent] agent to..."
-- Git skills use `git-` prefix; MR skills use `mr-` prefix
-- VCS: GitLab (`glab` CLI)
+- **All skills and agents must be project-agnostic.** No hard-coded project names, repo paths, team conventions or domain logic. Read the target project's `CLAUDE.md` for that at runtime.
+- Skills that delegate to agents stay thin, under 15 lines of body.
+- Agent description examples use one verb: "I'll use the [agent] agent to...".
+- VCS is GitLab (`glab` CLI).

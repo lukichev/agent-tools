@@ -75,16 +75,7 @@ Only `description` is recommended. All other fields are optional.
 
 ### Dynamic context injection
 
-Use the syntax `!` followed by a backtick-wrapped shell command to inject dynamic output before the skill is sent to Claude:
-
-```markdown
-Current branch: !{git branch --show-current}
-Changed files: !{git diff main...HEAD --name-only}
-```
-
-(Note: in actual skill files, use backtick-wrapped commands after `!` — the syntax here is illustrative.)
-
-Commands execute immediately and their output replaces the placeholder.
+Prefix a backtick-wrapped shell command with `!` to inject its output before the skill reaches Claude. The command runs immediately and its output replaces the placeholder. See `atlassian-research/SKILL.md` for a working example.
 
 ### Progressive Disclosure
 
@@ -96,6 +87,12 @@ Skills load in three levels:
 Keep the body lean. If approaching 500 lines, split detailed reference material into `references/` with clear pointers about when to read them.
 
 ## Writing Guide
+
+### Prose the skill generates
+
+If the skill writes prose for a human — a comment, a description, a ticket, a report — give it a line pointing at `~/.claude/guides/asd-ste100.md`. Do not restate the rules in the skill. Add only the limits that are specific to the artifact, such as a word cap or a section structure.
+
+A skill that only runs commands or edits code needs no pointer.
 
 ### Descriptions that trigger well
 

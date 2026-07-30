@@ -19,6 +19,7 @@ Push the current branch to the remote. If on main/master, create a feature branc
    - Pull latest: `git pull`
    - Detect ticket ID from recent commit message or ask user
    - Create feature branch: `git checkout -b TICKET-ID`
+   - **Rewind main to the remote**: `git branch -f main origin/main`. `/git-commit` commits on the current branch, so a commit made while on main is now on both. Without this, local main stays ahead of origin and the next push to main leaks it.
    - Restore stashed changes if any: `git stash pop`
 3. Push to remote:
    ```bash
@@ -28,5 +29,3 @@ Push the current branch to the remote. If on main/master, create a feature branc
 ## Rules
 
 - Never push directly to main/master — create a feature branch first
-- Always use `-u` to set upstream tracking on first push
-- If the branch already has a remote, a regular `git push` suffices

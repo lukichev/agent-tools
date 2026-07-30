@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Orchestrates rebases for every open MR you authored, respecting stacked-MR dependencies. All rebase logic lives in `/git-rebase` — this skill just plans the waves and spawns subagents.
 
+Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
+
 ## Workflow
 
 ### 1. Check MR status
@@ -97,7 +99,7 @@ Then run `/git-cleanup` to prune remote-tracking refs and delete local branches 
 
 ## Rules
 
-- All rebase logic lives in `/git-rebase` — don't duplicate it here.
+- The subagent prompts hold the executable steps. Keep them in step with `/git-rebase`, which owns the strategy.
 - Parallel within a wave, sequential between waves — the child's parent must be on the remote before the child rebases.
 - Always include descendants of rebased MRs, even if `behind: 0`.
 - Parent failure skips its descendants only; other chains continue.
