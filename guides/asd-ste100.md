@@ -46,7 +46,9 @@ These rules are deliberately flat and literal. They do not suit copy where voice
 
 ## What to cut
 
-- Idioms, slang and figurative language: "under the hood", "out of the box", "boil the ocean".
+- Idioms, slang and figurative language. "Under the hood", "out of the box", "smoking gun", "red herring", "low-hanging fruit" and "sanity check" are examples, not the whole set. Any figure of speech counts.
+  - Name the fact instead. "The smoking gun is the missing await" becomes "The missing `await` causes the failure". "That log line is a red herring" becomes "That log line is unrelated to the failure".
+  - This applies hardest to debug and review prose, where a figure of speech hides the evidence that the reader needs.
 - Hedges and filler: "essentially", "basically", "just", "simply", "actually", "in a sense", "I think", "it seems", "kind of".
 - Preambles, compliments and closing questions: "Nice work!", "Happy to discuss!", "One small nit".
 - Strings of synonyms.
