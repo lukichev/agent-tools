@@ -35,47 +35,17 @@ Skip Confluence search unless the user says otherwise.
 
 ### 4. AC Completeness Check
 
-For each AC item found in the ticket, evaluate it against the diff and changed files.
+Read `references/ac-coverage.md` and follow it with these inputs:
 
-Rate each AC:
-- `✅ Done` — clearly implemented in the diff
-- `⚠️ Partial` — some parts done, something looks missing
-- `❌ Missing` — no evidence of implementation
+- `TICKET` = the research output from step 3
+- `DIFF` = `git diff main...HEAD`
+- `TREE` = `$(git rev-parse --show-toplevel)`
 
-Output format:
-
-```
-## AC Completeness
-
-✅ AC #1 — <description>
-⚠️ AC #2 — <description>
-   → Missing: <what seems absent>
-❌ AC #3 — <description>
-   → Not found in diff
-```
-
-If all ACs are ✅, say so and continue. If any are ⚠️ or ❌, flag them clearly and **ask the user whether to continue** before proceeding to the next steps.
+**Then apply this gate, which is specific to this skill:** if all ACs are ✅, say so and continue. If any are ⚠️ or ❌, flag them and **ask the user whether to continue** before the next steps.
 
 ### 5. Debug Artifact Scan
 
-Search changed files for leftover debug artifacts:
-
-```bash
-git diff main...HEAD -- <changed-files> | grep -n "console\.log\|debugger\|\/\/ TODO\|\/\/ FIXME\|\/\/ temp\|\.only("
-```
-
-Also check for commented-out code blocks (3+ consecutive commented lines).
-
-Report findings as:
-
-```
-## Debug Artifacts
-
-⚠️ src/auth/login.service.ts:42 — console.log
-⚠️ src/jobs/listener.ts:18 — // TODO: remove this
-```
-
-If none found: `✅ No debug artifacts found`
+Read `references/debug-artifacts.md` and follow it with `DIFF` = `git diff main...HEAD`.
 
 ### 6. Code Review
 

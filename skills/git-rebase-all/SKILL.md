@@ -54,8 +54,8 @@ Each subagent prompt must be self-contained.
 > Rebase MR !<iid> (`<sourceBranch>` → `<targetBranch>`) via GitLab server-side rebase.
 >
 > 1. `glab api --method PUT "projects/:fullpath/merge_requests/<iid>/rebase"`
-> 2. Poll every 5s, **max 60 attempts (5 minutes)**: `glab api "projects/:fullpath/merge_requests/<iid>" --jq '{rebase_in_progress, merge_error}'`. Done when `rebase_in_progress` is false; failed if `merge_error` is set; **timed out** if the cap is reached while still in progress.
-> 3. Report: rebased with new SHA, failure reason, or `timed out after 5 minutes` (so the wave can proceed without hanging).
+> 2. Poll every 5s, **max 60 attempts (5 minutes)**: `glab api "projects/:fullpath/merge_requests/<iid>?include_rebase_in_progress=true" | jq '{rebase_in_progress, merge_error, sha}'`. Two gotchas with `glab` (it is not `gh`): the `--jq` flag is unsupported — pipe through `jq` instead; and `rebase_in_progress` is omitted unless `?include_rebase_in_progress=true` is in the query string (without it the field reads `null`, never `false`). Done when `rebase_in_progress` is not `true` (i.e. `false` or `null`); failed if `merge_error` is set; **timed out** if the cap is reached while still in progress.
+> 3. Report: rebased with new SHA (the `sha` field), failure reason, or `timed out after 5 minutes` (so the wave can proceed without hanging).
 
 **Local rebase prompt (has conflicts):**
 

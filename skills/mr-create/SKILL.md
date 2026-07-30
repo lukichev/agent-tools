@@ -67,7 +67,7 @@ Use the template from `mr-template.md` in this skill folder:
 | `{{TICKET_ID}}` | Ticket ID (e.g., PROJ-1234) — omit section if no ticket |
 | `{{SUMMARY}}` | One sentence: what was addressed |
 | `{{DETAILS}}` | 2-4 short bullets: what changed. No narrative, no restating the ticket. Omit if summary already covers it. |
-| `{{TESTING}}` | Short bullets of what the developer verified (not a QA checklist) |
+| `{{TESTING}}` | Short bullets of what the developer verified and its result. State facts ("build passed", "app launched", "endpoint returned 200"), not reasoning about why the change is safe. |
 
 ### 3. Post-MR Slack Message
 
@@ -100,6 +100,7 @@ After successfully creating a new MR **or** finding an existing one (skip only i
 - Wholesale rewrite IS acceptable for a single-commit force-push/amend (no review history yet)
 - Only update an existing MR's description when the user explicitly asks for it
 - **Never use checkboxes** (`- [ ]`) in the Testing section — use plain bullet points instead
+- **Testing section states outcomes, not reasoning.** Write only what was verified and its pass/fail result (e.g. "Build succeeded, app launched, faxes sent correctly"). Do not explain *why* something is safe or *why* it should work (e.g. no code-reasoning like "the method only destructures X, so the change is type-only"). That belongs in Details, not Testing.
 - **Keep descriptions terse.** Summary: one sentence. Details: 2-4 short bullets max — what changed, not a narrative. Testing: short bullets of what was verified. No filler, no restating the ticket, no "this MR does X, Y, and Z" preambles. If a section has nothing meaningful to add, omit it.
 
 ## glab Reference

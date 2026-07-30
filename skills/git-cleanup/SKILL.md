@@ -19,7 +19,21 @@ DEFAULT=$(git symbolic-ref --quiet refs/remotes/origin/HEAD | sed 's@^refs/remot
 DEFAULT=${DEFAULT:-main}   # fall back to main if origin/HEAD isn't set
 ```
 
-## Step 1 — Prune remote-tracking refs
+## Step 1 — Switch to the default branch
+
+Stand on `$DEFAULT` before you clean anything. The current branch is protected, so cleaning from a feature branch shields that branch from every later step.
+
+```bash
+git switch "$DEFAULT"
+```
+
+Guards — in each of these cases, **do not switch**; report it and continue the cleanup from the current branch, which stays protected:
+
+- Already on `$DEFAULT` — nothing to do.
+- `git status --short` is non-empty (uncommitted changes or untracked files). Never stash to force the switch.
+- The switch fails because another worktree has `$DEFAULT` checked out.
+
+## Step 2 — Prune remote-tracking refs
 
 Sync with the remote and drop `origin/*` refs for branches deleted upstream. This is what makes the `: gone]` markers in later steps accurate.
 
@@ -27,13 +41,29 @@ Sync with the remote and drop `origin/*` refs for branches deleted upstream. Thi
 git fetch --prune
 ```
 
-## Step 2 — Worktrees
+## Step 3 — Worktrees
 
 ```bash
 git worktree list --porcelain
 ```
 
-The **first** entry is the primary checkout — never remove it. Also never remove the worktree you're standing in (`git rev-parse --show-toplevel`). For every *other* worktree:
+The **first** entry is the primary checkout — never remove it. Also never remove the worktree you're standing in (`git rev-parse --show-toplevel`).
+
+**Review worktrees** — `mr-<IID>` directories created by `/mr-review`, on a local branch of the same name — are **protected**, along with that branch and its `refs/mr-review/<IID>` ref. Leave all three and report each as intentionally skipped. A review is often resumed days later, and follow-up questions need the tree. The branch also reads as `: gone]` and unmerged, so the branch logic below would otherwise churn on it.
+
+Report the disk cost so the user can decide. A review tree is a full checkout:
+
+```bash
+du -sh <path>
+```
+
+The user removes one by hand:
+
+```bash
+git worktree remove <path> && git branch -D "mr-<IID>" && git update-ref -d "refs/mr-review/<IID>"
+```
+
+For every *other* worktree:
 
 1. **Holds a protected branch?** If its branch is the default branch, `production`, or any protected name from `CLAUDE.md`, **leave it** — a worktree someone keeps for a protected branch is almost always deliberate. Note it as intentionally skipped.
 2. **Has unfinished work?** If `git -C <path> status --short` is non-empty (uncommitted changes *or* untracked files), or a stash references its branch (`git stash list` line mentioning the branch), **leave it and report it**. Removing it would strand that work.
@@ -49,13 +79,13 @@ After removing worktrees, tidy any leftover administrative entries:
 git worktree prune
 ```
 
-## Step 3 — Local branches whose upstream is gone
+## Step 4 — Local branches whose upstream is gone
 
 ```bash
 git branch -vv
 ```
 
-Collect branches marked `: gone]` (their tracked remote branch was deleted) — excluding protected refs and any already handled in Step 2. For each, **verify the work actually landed before deleting.**
+Collect branches marked `: gone]` (their tracked remote branch was deleted) — excluding protected refs and any already handled in Step 3. For each, **verify the work actually landed before deleting.**
 
 Do **not** trust `git branch -d` ancestry or `git cherry` — a squash-merge collapses the branch's commits into one new commit on the default branch, so neither sees the original commits and both wrongly report "not merged." Compare *content* instead, via the merge check below.
 
@@ -82,7 +112,24 @@ Why scope the diff to just those files: comparing only the files the branch touc
 
 > Note: this compares against the default branch. A branch that was merged into a *parent* feature branch rather than `$DEFAULT` will read as unmerged here — which is the safe direction (reported, not deleted). If the user works with stacked branches, mention this so they can decide.
 
-## Step 4 — Stashes
+## Step 5 — Local branches diverged from a live upstream
+
+After a server-side rebase or force-push, `git branch -vv` shows branches whose upstream still exists (not `: gone]`) but reads `[ahead N, behind M]`. The remote is authoritative; the local `ahead` commits are usually stale pre-rebase twins. Sync only after proving they add nothing the remote lacks — run the [merge check](#merge-verification) with the **upstream** in place of `origin/$DEFAULT`:
+
+- **Empty diff** → rebased twins, safe to hard-reset the pointer to the upstream.
+- **Non-empty diff** → unique local commits; keep and report. **Never force-move** — `git branch -f` discards them silently.
+
+Once all verified safe, sync in one pass (skips the current branch, then fast-forwards it):
+
+```bash
+cur=$(git symbolic-ref --short HEAD)
+git for-each-ref --format='%(refname:short) %(upstream:short)' refs/heads | while read -r b u; do
+  [ -n "$u" ] && [ "$b" != "$cur" ] && git branch -f "$b" "$u"
+done
+git merge --ff-only @{u}   # updates the branch you're standing on
+```
+
+## Step 6 — Stashes
 
 ```bash
 git stash list
@@ -116,22 +163,29 @@ Always close with a table of every item and its disposition:
 ```
 | Item                        | Type      | Action                  | Why                                  |
 |-----------------------------|-----------|-------------------------|--------------------------------------|
+| HEAD                        | checkout  | switched to main        | was on PROJ-1099; frees it for review|
 | origin/feat/PROJ-1020       | remote    | pruned                  | deleted upstream                     |
 | /tmp/wt-PROJ-1100           | worktree  | converted → branch      | clean; branch kept (not yet merged)  |
 | /tmp/wt-PROJ-1099           | worktree  | converted, branch -D    | clean, gone on remote, merged        |
 | /tmp/wt-PROJ-1200           | worktree  | left alone              | uncommitted changes                  |
+| /tmp/mr-7008                | worktree  | left alone (88M)        | MR review tree, protected            |
 | PROJ-1099                   | branch    | deleted (branch -D)     | gone + content matches main          |
 | PROJ-1150                   | branch    | KEPT — unmerged         | gone on remote but diff non-empty    |
+| PROJ-1300                   | branch    | synced (branch -f)      | diverged; local commits are rebased twins on remote |
+| PROJ-1301                   | branch    | KEPT — unique local work| diverged; local-only commits not on remote |
 | stash@{0}                   | stash     | dropped (confirmed)     | content already in main              |
 | stash@{1}                   | stash     | KEPT                    | unique unsaved work                  |
 ```
 
 ## Rules
 
+- Switch to the default branch first, so no feature branch hides behind the current-branch protection. Skip the switch when the working tree is dirty or another worktree holds the default branch — never stash to force it.
 - Protected always: current branch, default branch (`main`/`master`), `production`, plus any named in the project's `CLAUDE.md`.
 - Verify merges by content diff, not ancestry — squash-merges defeat `git branch -d` and `git cherry`.
 - Auto-delete only branches that are both **gone on remote** and **proven merged**. Unmerged `: gone]` branches are reported, never deleted.
+- Sync a diverged branch to its live upstream (`git branch -f`) only after proving its local-only commits add nothing the remote lacks — `git branch -f` discards them silently. Diverged branches with unique local work are reported, never force-moved.
 - Worktrees holding a protected branch, or with uncommitted changes, untracked files, or an associated stash, are left untouched and reported.
+- `mr-<IID>` review worktrees, their branches and their `refs/mr-review/<IID>` refs are protected. Report the disk cost, remove nothing.
 - Never `--force` a `git worktree remove`; if it fails (locked or submodule), report and continue.
 - Never drop a stash without showing its content and getting explicit confirmation. Default to keeping.
 - Explain each action as you go, and always end with the disposition summary.

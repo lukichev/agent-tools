@@ -32,9 +32,14 @@ Extract `head_pipeline.status` (`success`, `failed`, `running`, `pending`, `manu
 
 **Unresolved discussions**:
 ```bash
-glab api "projects/:fullpath/merge_requests/<iid>/discussions"
+glab api "projects/:fullpath/merge_requests/<iid>/discussions?per_page=100"
 ```
-Count threads where `notes[0].resolvable == true && notes[0].resolved == false`. Also extract the first line of each unresolved comment for the summary.
+
+**Drop every note where `system == true` before you count anything.** GitLab returns activity entries ("changed the description", "added 1 commit") as discussions. They are not review feedback, and an MR can consist entirely of them.
+
+From what remains, count threads where `notes[0].resolvable == true && notes[0].resolved == false`. Also extract the first line of each unresolved comment for the summary.
+
+`per_page=100` is required. The default page size is 20, so a busy MR silently truncates.
 
 **Rebase needed** — determine from `has_conflicts` and `detailed_merge_status`:
 - `has_conflicts: true` → needs rebase (conflicts)
