@@ -1,45 +1,42 @@
 # Angular 21 Code Style Guide
 
-Modern Angular 21 patterns and best practices.
-
 ## TypeScript
 
-- Use strict type checking
-- Prefer type inference when the type is obvious
-- Avoid `any`; use `unknown` when type is uncertain
-- Always use braces for `if`/`else`/`for`/`while` — no single-line bodies without braces
+- Strict type checking
+- Type inference when the type is obvious
+- No `any`. Use `unknown` when the type is uncertain
+- Braces on every `if`/`else`/`for`/`while` body
 
 ## Components
 
-- Always use standalone components (do NOT set `standalone: true` in decorators — it's the default)
-- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
-- Keep components small and focused on a single responsibility
-- Prefer inline templates for small components
-- Use `input()`, `output()`, and `model()` functions instead of `@Input`/`@Output` decorators — `model()` is the signal-based replacement for banana-in-a-box two-way binding
-- Do NOT use `@HostBinding`/`@HostListener` — use the `host` object in `@Component`/`@Directive` instead
-- Do NOT use `ngClass` — use `class` bindings instead
-- Do NOT use `ngStyle` — use `style` bindings instead
-- Use `NgOptimizedImage` for all static images (does not work for inline base64)
+- Standalone components. Do not set `standalone: true`, it is the default
+- `changeDetection: ChangeDetectionStrategy.OnPush` in every `@Component`
+- Small components with a single responsibility
+- Inline templates for small components
+- `input()`, `output()` and `model()` instead of `@Input`/`@Output`. `model()` replaces banana-in-a-box two-way binding
+- The `host` object in `@Component`/`@Directive` instead of `@HostBinding`/`@HostListener`
+- `class` bindings instead of `ngClass`, `style` bindings instead of `ngStyle`
+- `NgOptimizedImage` for all static images (not for inline base64)
 
 ## Services
 
-- Design services around a single responsibility
-- Use `providedIn: 'root'` for singleton services
-- Use the `inject()` function instead of constructor injection
+- Single responsibility per service
+- `providedIn: 'root'` for singletons
+- `inject()` instead of constructor injection
 
 ## Change Detection
 
-- Angular 21 apps are **zoneless by default** — new projects no longer include `zone.js`
-- Signals drive change detection in zoneless apps; avoid patterns that assume zone-triggered checks (e.g. `setTimeout` expecting a view refresh)
-- If migrating an older app, flip `provideZonelessChangeDetection()` and audit for missing signal updates before enabling
+- Angular 21 apps are **zoneless by default**. New projects do not include `zone.js`
+- Signals drive change detection. Do not rely on zone-triggered checks, such as a `setTimeout` that expects a view refresh
+- When migrating an older app, enable `provideZonelessChangeDetection()` and audit for missing signal updates first
 
 ## Template Syntax
 
-- Use `@if`, `@for`, `@switch` control flow (not `*ngIf`, `*ngFor`, `*ngSwitch`)
-- Keep templates simple — avoid complex logic
-- Use the `async` pipe to handle observables
-- Do NOT write arrow functions in templates (not supported)
-- Do NOT assume globals like `new Date()` are available in templates
+- `@if`, `@for`, `@switch`, not `*ngIf`, `*ngFor`, `*ngSwitch`
+- No complex logic in templates
+- The `async` pipe for observables
+- No arrow functions in templates (unsupported)
+- No globals such as `new Date()` in templates
 
 ```html
 @if (loading()) {
@@ -53,11 +50,11 @@ Modern Angular 21 patterns and best practices.
 
 ## Signals
 
-- Use signals for local component state
-- Use `computed()` for read-only derived state
-- Use `linkedSignal()` for writable state that follows a source but accepts manual overrides (e.g. a selection that resets when the list changes but the user can still pick a different value)
-- Expose writable signals externally as `.asReadonly()` when consumers shouldn't mutate them
-- Keep state transformations pure and predictable
+- Signals for local component state
+- `computed()` for read-only derived state
+- `linkedSignal()` for writable state that follows a source but accepts manual overrides, such as a selection that resets when the list changes
+- Expose writable signals as `.asReadonly()` when consumers must not mutate them
+- Pure state transformations
 
 ```typescript
 readonly items = signal<Item[]>([]);
@@ -74,7 +71,7 @@ readonly selected = linkedSignal<Item | undefined>({
 
 ## Async Data
 
-Prefer the **Resource API** (currently experimental but the recommended direction) over ad-hoc `subscribe()` blocks for signal-backed async state. Resources are reactive to their params, expose `value`, `status`, `error`, `isLoading`, and a `reload()` method.
+Prefer the **Resource API** (experimental, but the recommended direction) over `subscribe()` blocks for signal-backed async state. A resource reacts to its params and exposes `value`, `status`, `error`, `isLoading` and `reload()`.
 
 ```typescript
 // Plain HTTP GET backed by HttpClient — use httpResource for this common case.
@@ -94,7 +91,7 @@ readonly stream = rxResource({
 });
 ```
 
-In templates, branch on `status` rather than juggling booleans:
+In templates, branch on `status`:
 
 ```html
 @switch (user.status()) {
@@ -106,11 +103,11 @@ In templates, branch on `status` rather than juggling booleans:
 
 ## RxJS Patterns
 
-Use RxJS for long-lived streams, complex flow orchestration, or interop with observable APIs. For simple HTTP-backed signal state, prefer `httpResource()` / `rxResource()` (see above).
+RxJS for long-lived streams, complex orchestration, or observable APIs. For HTTP-backed signal state, `httpResource()` / `rxResource()` (see above).
 
 ### Cleanup for Long-lived Observables
 
-Use `takeUntilDestroyed` with `DestroyRef`:
+`takeUntilDestroyed` with `DestroyRef`:
 
 ```typescript
 readonly #destroyRef = inject(DestroyRef);
@@ -124,7 +121,7 @@ ngOnInit(): void {
 
 ### One-off HTTP Side Effects
 
-For fire-and-forget HTTP calls that aren't feeding signal state, use `tap/catchError/finalize` with an empty `subscribe()`:
+For a fire-and-forget HTTP call that feeds no signal, `tap/catchError/finalize` with an empty `subscribe()`:
 
 ```typescript
 this.service.save(payload)
@@ -140,10 +137,8 @@ this.service.save(payload)
 
 ## Forms
 
-Two APIs are available in Angular 21:
-
-- **Reactive Forms** — the mature, stable choice. Use for all forms today.
-- **Signal Forms** — new, experimental, signal-native forms API. Evaluate for greenfield complex forms; plan to migrate heavy forms once the API stabilizes.
+- **Reactive Forms**: stable. Use for all forms today.
+- **Signal Forms**: experimental. Evaluate for greenfield complex forms, migrate heavy forms once the API stabilizes.
 
 ### Validation Errors (Reactive Forms)
 
@@ -161,8 +156,8 @@ Two APIs are available in Angular 21:
 
 ## Routing
 
-- Implement lazy loading for feature routes
-- Use functional guards (not class-based `CanActivate`)
+- Lazy loading for feature routes
+- Functional guards, not class-based `CanActivate`
 
 ```typescript
 export const MY_ROUTES: Routes = [
@@ -180,7 +175,7 @@ export const MY_ROUTES: Routes = [
 |------|---------|
 | Use CSS variables | `color: var(--text-color)` |
 | Use rem/em units | `padding: 1rem` |
-| Do NOT use `::ng-deep` | Deprecated — use component styles, CSS variables, or global utility classes |
+| Do NOT use `::ng-deep` | Deprecated. Use component styles, CSS variables, or global utility classes |
 | Do NOT use `ViewEncapsulation.None` | Keep default encapsulation |
 | Do NOT use BEM naming | Use flat, descriptive class names |
 
@@ -198,12 +193,12 @@ export const MY_ROUTES: Routes = [
 
 ## Accessibility
 
-- Must pass all AXE checks
-- Must follow WCAG AA minimums: focus management, color contrast, ARIA attributes
-- Prefer Angular's built-in ARIA directives (shipped in v21) over hand-rolling `aria-*` bindings where equivalents exist
+- Pass all AXE checks
+- WCAG AA minimums: focus management, color contrast, ARIA attributes
+- Angular's built-in ARIA directives (v21) over hand-written `aria-*` bindings
 
 ## Testing
 
-- New projects use **Vitest** as the default test runner (Karma was removed from new app scaffolds in v21)
-- Existing Karma projects keep working; migrate via `ng generate @angular/core:karma-to-vitest` when convenient
-- Test signal-driven components by reading signals directly (`component.count()`) — no `fakeAsync`/`tick` needed for synchronous signal propagation in zoneless mode
+- **Vitest** is the default runner. Karma is gone from new scaffolds in v21
+- Migrate an existing Karma project with `ng generate @angular/core:karma-to-vitest`
+- Read signals directly in tests (`component.count()`). Zoneless signal propagation is synchronous, so no `fakeAsync`/`tick`

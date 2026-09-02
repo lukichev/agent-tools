@@ -6,27 +6,27 @@ context: fork
 
 # MR Status Check
 
-Dashboard view of all your open MRs — comments, pipeline, rebase status, merge readiness.
+Dashboard of your open MRs: comments, pipeline, rebase status, merge readiness. Read-only. Never modify an MR, push or rebase.
 
-Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
+Read `~/.claude/guides/glab-api.md` before you call `glab`.
 
 ## Workflow
 
-### 1. Fetch All Open MRs
+### 1. Fetch all open MRs
 
 ```bash
 glab mr list --author=@me --output json
 ```
 
-Parse to get: `iid`, `title`, `source_branch`, `target_branch`, `has_conflicts`, `detailed_merge_status`, `blocking_discussions_resolved`, `user_notes_count`, `web_url`.
+Keep: `iid`, `title`, `source_branch`, `target_branch`, `has_conflicts`, `detailed_merge_status`, `blocking_discussions_resolved`, `user_notes_count`, `web_url`.
 
-If no open MRs, inform the user and stop.
+No open MRs: say so and stop.
 
-### 2. Fetch Details Per MR
+### 2. Fetch details per MR
 
-Issue the calls for **every** MR in one message, so they run together. Filter each in the pipe — the raw responses carry descriptions, diff refs and author objects you do not use.
+Issue the calls for every MR in one message, so they run together. Filter each in the pipe.
 
-**Pipeline status and merge status** (not in list output):
+**Pipeline and merge status** (not in the list output):
 ```bash
 glab mr view <iid> --output json \
   | jq '{pipeline: .head_pipeline.status, merge: .detailed_merge_status}'
@@ -43,19 +43,19 @@ glab api "projects/:fullpath/merge_requests/<iid>/discussions?per_page=100" \
 ```
 The `system` filter is required, per the glab guide. Count what remains.
 
-**Rebase needed** — map `detailed_merge_status` per the glab guide. Take it from the single-MR GET in step 2, never from the list response.
+**Rebase needed**: map `detailed_merge_status` per the glab guide. Take it from the single-MR GET above, never from the list response.
 
-**Divergence from target** — fetch every branch once, before the loop, not once per MR:
+**Behind target**: fetch every branch once, before the loop:
 ```bash
 git fetch origin <all-source-and-target-branches> 2>/dev/null
 ```
-Then, per MR, count commits on target that aren't in source:
+Then per MR:
 ```bash
 git rev-list --count origin/<source_branch>..origin/<target_branch>
 ```
-This gives the number of commits the source branch is **behind** the target. Display as `N behind` (e.g. `12 behind`, or `up to date` if 0).
+Display as `N behind`, or `up to date` when 0.
 
-### 3. Display Summary Table
+### 3. Summary table
 
 ```
 | MR    | Title                          | Pipeline | Comments     | Rebase | Behind   | Status          |
@@ -65,34 +65,34 @@ This gives the number of commits the source branch is **behind** the target. Dis
 | !125  | refactor(deps): luxon, PROJ-9175| manual   | none         | ok     | 0        | ready           |
 ```
 
-**Status column logic.** These overlap, so evaluate in this order and take the first match:
+Truncate titles to 40 chars. Sort: needs attention, then waiting, then ready.
 
-1. `draft` — MR is marked as draft
-2. `blocked` — pipeline failed
-3. `needs attention` — unresolved comments, or conflicts, or behind > 0
-4. `waiting` — pipeline running or pending
-5. `ready` — pipeline passed or manual, no unresolved comments, no rebase needed, **behind == 0**
+**Status column.** Evaluate in this order and take the first match:
 
-A branch that is behind its target is **not mergeable** — it must be rebased first.
+1. `draft`: MR is marked as draft
+2. `blocked`: pipeline failed
+3. `needs attention`: unresolved comments, or conflicts, or behind > 0
+4. `waiting`: pipeline running or pending
+5. `ready`: pipeline passed or manual, no unresolved comments, no rebase needed, behind == 0
 
-### 4. Show Unresolved Comments Detail
+A branch behind its target is not mergeable until it is rebased.
 
-For each MR with unresolved comments, show a brief summary:
+### 4. Unresolved comment detail
+
+For each MR with unresolved comments, first line of each comment, truncated to 100 chars:
 
 ```
-!123 — 2 unresolved comments:
+!123 - 2 unresolved comments:
   - @reviewer (line 42 of src/auth.ts): "Should this handle the refresh token case?"
   - @reviewer (line 88 of src/auth.ts): "Missing null check"
 ```
 
-Keep it brief — first line of each comment, truncated to 100 chars.
-
 ## Output Format
 
-This skill runs in a forked context — only the final message reaches the caller, so it must be self-contained. Always include both:
+This skill runs forked. Only the final message reaches the caller, so it must hold both:
 
-1. The human-readable summary table and unresolved-comment details
-2. A fenced JSON block with one record per MR so callers (like `/git-rebase-all`) can consume it programmatically:
+1. The summary table and the unresolved comment detail.
+2. A fenced JSON block with one record per MR, for callers such as `/git-rebase-all`:
 
 ```json
 [
@@ -112,11 +112,4 @@ This skill runs in a forked context — only the final message reaches the calle
 ]
 ```
 
-Include every open MR in the JSON (even `ready` ones) — `/git-rebase-all` needs the full list to resolve stacked-MR parent relationships.
-
-## Rules
-
-- **Read-only** — never modify MRs, push, or rebase
-- Issue the per-MR calls for every MR in one message, not one MR at a time
-- Truncate long titles to 40 chars in the table
-- Sort MRs: needs attention first, then waiting, then ready
+Include every open MR in the JSON, `ready` ones too. `/git-rebase-all` needs the full list to resolve stacked-MR parents.

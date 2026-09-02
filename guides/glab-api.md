@@ -1,8 +1,6 @@
 # glab and GitLab API Reference
 
-Shared by `git-rebase`, `git-rebase-all`, `mr-review`, `mr-status-check` and `mr-comment`. Every item here is a rule that produces a wrong result when you ignore it.
-
-`glab` is not `gh`. The flags differ.
+Shared by `git-rebase`, `git-rebase-all`, `mr-review`, `mr-status-check` and `mr-comment`. Ignore an item here and the result is wrong. `glab` is not `gh`.
 
 ## Command and flag limits
 
@@ -18,11 +16,11 @@ Shared by `git-rebase`, `git-rebase-all`, `mr-review`, `mr-status-check` and `mr
 
 ## Discussions carry activity entries
 
-GitLab returns activity entries as discussions: "changed the description", "added 1 commit". Drop every note where `system == true` before you count or display anything. An MR can consist entirely of these. Unfiltered, the output invents prior feedback that nobody wrote.
+GitLab returns activity entries as discussions: "changed the description", "added 1 commit". Drop every note where `system == true` before you count or display anything. An MR can consist entirely of these.
 
 ## Mergeability is cached in list responses
 
-`glab mr list` returns cached mergeability. It often reports `detailed_merge_status: "unchecked"` with a meaningless `has_conflicts: false`. Never decide anything from those values.
+`glab mr list` returns cached mergeability. It often reports `detailed_merge_status: "unchecked"` with a meaningless `has_conflicts: false`. Never decide from those values.
 
 To force GitLab's lazy recompute, call the single-MR GET endpoint and poll until the status leaves `unchecked` and `checking`:
 
@@ -45,11 +43,11 @@ Key off `detailed_merge_status`, not `has_conflicts`:
 
 ## Inline comments need the Discussions API
 
-The `-f` form fields of `glab api` do not nest the `position` object. The comment posts as a general MR comment instead of an inline one. Use `curl` against the Discussions API, then confirm `notes[0].type` is `DiffNote`.
+The `-f` form fields of `glab api` do not nest the `position` object, so the comment posts as a general MR comment. Use `curl` against the Discussions API, then confirm `notes[0].type` is `DiffNote`.
 
 ## jq breaks on payloads with raw control characters
 
-A description that holds raw control characters makes `jq` fail with "Invalid string: control characters ... must be escaped" and return empty output. A poll loop then reads an empty `rebase_in_progress` and exits with a false "done".
+A description with raw control characters makes `jq` fail with "Invalid string: control characters ... must be escaped" and return empty output. A poll loop then reads an empty `rebase_in_progress` and reports a false "done".
 
 Parse with `python3` when a payload may hold such text:
 

@@ -1,29 +1,5 @@
 # NestJS Style Guide
 
-Based on NestJS official docs and established best practices.
-
----
-
-## Table of Contents
-
-1. [Project Structure](#1-project-structure)
-2. [Naming Conventions](#2-naming-conventions)
-3. [Modules](#3-modules)
-4. [Controllers](#4-controllers)
-5. [Services](#5-services)
-6. [DTOs & Validation](#6-dtos--validation)
-7. [Entities & Repositories](#7-entities--repositories)
-8. [Guards & Authorization](#8-guards--authorization)
-9. [Interceptors & Pipes](#9-interceptors--pipes)
-10. [Exception Handling](#10-exception-handling)
-11. [Events & Queues](#11-events--queues)
-12. [Configuration](#12-configuration)
-13. [Testing](#13-testing)
-14. [Logging](#14-logging)
-15. [Code Style](#15-code-style)
-
----
-
 ## 1. Project Structure
 
 Organize by **vertical feature slices**. Each module is self-contained.
@@ -67,9 +43,7 @@ src/
 - One module per feature domain. Never put two unrelated features in one module.
 - Shared building blocks go in `_shared/`, not in feature modules.
 - Utilities (pure functions, helpers) go in `_utils/`.
-- Migrations are never auto-generated in production — always review before running.
-
----
+- Never auto-generate a migration in production. Review before you run one.
 
 ## 2. Naming Conventions
 
@@ -85,7 +59,7 @@ src/
 | DB columns       | `snake_case`        | `account_id`, `created_at`       |
 | Route paths      | `kebab-case`        | `v1/recurring-reports`           |
 
-**Project prefix:** All public classes use a consistent project prefix (examples below use `Dcm` for illustration). Apply your project's prefix consistently.
+**Project prefix:** every public class carries the project prefix. Examples use `Dcm`.
 
 ```typescript
 // Good
@@ -96,11 +70,7 @@ export class DcmRecurringReportEntity { ... }
 export class RecurringReportsService { ... }
 ```
 
----
-
 ## 3. Modules
-
-Modules are the primary unit of encapsulation. Each module declares its entities in a static array for aggregation.
 
 ```typescript
 @Module({
@@ -125,10 +95,8 @@ export class DcmRecurringReportsModule {
 **Rules:**
 - Declare `static entities = [...]` on every module that owns database entities. This allows the central ORM config to aggregate them without importing the module itself.
 - Export only what other modules need. Keep your public API minimal.
-- Don't import feature modules into `_shared` modules — `_shared` must have zero upward dependencies.
+- Don't import feature modules into `_shared` modules. `_shared` has zero upward dependencies.
 - Register queue workers inside the module that owns the domain, not in `CoreModule`.
-
----
 
 ## 4. Controllers
 
@@ -174,12 +142,10 @@ export class DcmRecurringReportsController {
 
 **Rules:**
 - Apply `@UsePipes(new ValidationPipe({ transform: true }))` at controller level so all endpoints validate and transform inputs.
-- Use `@CurrentUser()`, `@CurrentAccount()` parameter decorators — never read from `request` directly.
+- Use `@CurrentUser()` and `@CurrentAccount()` parameter decorators. Never read from `request` directly.
 - Return the service promise directly; don't `await` in controllers unless you need the value.
-- Keep route handlers to 1–3 lines. If you need more, move the logic to the service.
+- Keep route handlers to 1-3 lines. If you need more, move the logic to the service.
 - Declare `static excludedEndpointsFromGlobalPrefix` when a controller has routes outside the global prefix.
-
----
 
 ## 5. Services
 
@@ -233,8 +199,6 @@ export class DcmContactService {
 - Emit domain events via `EventEmitter2`, not from controllers.
 - Inject `DataSource` (named connection) only when you need raw queries or transactions that span multiple repositories.
 - Never `catch` and swallow errors silently. Log and rethrow, or convert to a typed HTTP exception.
-
----
 
 ## 6. DTOs & Validation
 
@@ -294,14 +258,12 @@ export class DcmSharedPaginationDto {
 ```
 
 **Rules:**
-- Always `@Transform` before `@Is*` validators — transformation runs first when `transform: true` is set.
+- `@Transform` before `@Is*` validators. Transformation runs first when `transform: true` is set.
 - Extend `DcmSharedPaginationDto` for any list/query DTO that supports paging.
 - Use `declare` (not re-assignment) to override inherited fields in DTO subclasses.
 - Never reuse a DTO across multiple unrelated operations. Create specific DTOs per operation.
 - DTOs live in a `dtos/` sub-folder for modules with multiple, or inline in `feature.dto.ts` for simple ones.
-- Apply `@Type(() => Number)` for numeric query params — HTTP delivers everything as strings.
-
----
+- Apply `@Type(() => Number)` to numeric query params. HTTP delivers strings.
 
 ## 7. Entities & Repositories
 
@@ -338,7 +300,7 @@ export abstract class DcmAuditable extends BaseEntity {
 **Rules:**
 - All entities extend `DcmAuditable` unless there's an explicit reason not to.
 - Always include both the relation (`account`) and the FK column (`accountId`) so you can query by FK without joining.
-- Use `Relation<T>` for relation types — avoids circular dependency issues at runtime.
+- Use `Relation<T>` for relation types. It avoids circular dependency issues at runtime.
 - Use `snake_case` for column `name` and table `name`. TypeORM's auto-naming is inconsistent across versions.
 - Never put business logic in entities. Keep them as pure data containers.
 
@@ -374,11 +336,9 @@ this.contactRepository = contactRepository.extend(dcmContactRepository);
 
 **Rules:**
 - Define a matching `I*Repository` interface so TypeScript can type-check `this` inside repository methods.
-- Repository method objects are plain objects — don't use classes or decorators here.
+- Repository method objects are plain objects. No classes or decorators here.
 - Complex queries with `createQueryBuilder` always belong in repository extensions, not services.
-- Use `getManyAndCount()` for paginated list endpoints — one query, two results.
-
----
+- Use `getManyAndCount()` for paginated list endpoints: one query, two results.
 
 ## 8. Guards & Authorization
 
@@ -416,7 +376,7 @@ getReports() { ... }
 
 #### Parameter Decorators
 
-Always use typed parameter decorators for auth context. Never read `req.user` directly.
+Typed parameter decorators for auth context. Never read `req.user` directly.
 
 ```typescript
 export const CurrentUser = createParamDecorator(
@@ -431,12 +391,10 @@ export const CurrentAccount = createParamDecorator(
 ```
 
 **Rules:**
-- Authentication and authorization are separate concerns — separate guards.
+- Authentication and authorization are separate concerns, so separate guards.
 - Guards throw standard HTTP exceptions (`UnauthorizedException`, `ForbiddenException`), never return `false`.
 - Populate all auth context onto the request object in the authentication guard, not in individual controllers.
-- Use `Reflector` to read metadata from decorators inside guards/interceptors — don't pass data via constructor.
-
----
+- Use `Reflector` to read decorator metadata inside guards and interceptors. Don't pass data via the constructor.
 
 ## 9. Interceptors & Pipes
 
@@ -488,8 +446,6 @@ createBulk(@Body(DcmTransformBodyToArrayPipe) bodies: DcmContactCreateDto[]) { .
 - Apply `ValidationPipe` at controller class level, not per-route, unless a route needs different options.
 - Custom pipes are for **shape transformation** (array wrapping, string splitting). Validation stays in DTOs.
 
----
-
 ## 10. Exception Handling
 
 #### Use standard NestJS exceptions first
@@ -522,12 +478,10 @@ export class DcmTwoFactorCodeInvalidException extends ForbiddenException {
 
 **Rules:**
 - Never `throw new Error(...)` in application code. Always use a typed NestJS or domain exception.
-- Exception messages must be user-readable — they surface in API responses.
+- Exception messages must be user-readable. They surface in API responses.
 - Domain exceptions live in an `exceptions/` folder inside the feature module.
-- Don't create a domain exception for a one-off throw — use the standard class directly.
+- Don't create a domain exception for a one-off throw. Use the standard class.
 - Don't use a global `try-catch` exception filter to swallow errors. Let NestJS's built-in filter handle formatting.
-
----
 
 ## 11. Events & Queues
 
@@ -586,11 +540,9 @@ export class DcmRecurringReportsQueue extends WorkerHost {
 
 **Rules:**
 - Queue processors extend `WorkerHost` and are registered in the owning feature module.
-- Always re-fetch the entity inside the processor — job data may be stale.
+- Re-fetch the entity inside the processor. Job data may be stale.
 - Handle `error` and `failed` worker events explicitly; don't let failures be silent.
 - Queue name constants go in `feature-name.interfaces.ts` as `UPPER_SNAKE_CASE` exports.
-
----
 
 ## 12. Configuration
 
@@ -612,11 +564,9 @@ export const dcmSqlConfigFactory = (type: 'mysql' | 'pgsql'): TypeOrmModuleOptio
 
 **Rules:**
 - `synchronize: false` always. Use migrations.
-- Config factories are pure functions returning plain objects — no NestJS decorators.
+- Config factories are pure functions that return plain objects. No NestJS decorators.
 - Access config in services via injected `ConfigService`, not via the factory directly.
 - Environment-specific overrides go in `.env.development`, `.env.test`, `.env.production`.
-
----
 
 ## 13. Testing
 
@@ -669,13 +619,11 @@ describe('DcmRecurringReportsService', () => {
 
 **Rules:**
 - Test files live alongside source: `feature.service.spec.ts` next to `feature.service.ts`.
-- Use `getRepositoryToken(Entity, connectionName)` — named connections require the second argument.
+- Use `getRepositoryToken(Entity, connectionName)`. A named connection requires the second argument.
 - Mock only what the unit under test calls. Don't mock the entire module.
 - Test the public interface, not implementation details.
 - Name test cases as sentences: `'returns reports for the account'`, not `'should work'`.
 - Prefer `describe` blocks per method over one flat list of `it` blocks.
-
----
 
 ## 14. Logging
 
@@ -703,10 +651,10 @@ export class DcmRecurringReportsService {
 | Level      | When to use                                               |
 |------------|-----------------------------------------------------------|
 | `log`      | Normal operations, lifecycle events                       |
-| `warn`     | Unexpected but recoverable — e.g., entity not found in queue |
-| `error`    | Exceptions, failures — always include `error.stack`       |
-| `debug`    | Detailed diagnostic info — disabled in production         |
-| `verbose`  | Very fine-grained tracing — development only              |
+| `warn`     | Unexpected but recoverable, for example an entity missing from a queue |
+| `error`    | Exceptions and failures. Always include `error.stack`     |
+| `debug`    | Detailed diagnostic info. Disabled in production          |
+| `verbose`  | Very fine-grained tracing. Development only               |
 
 **Rules:**
 - Always pass `error.stack` as the second argument to `logger.error()`.
@@ -714,12 +662,10 @@ export class DcmRecurringReportsService {
 - Log at the point of failure, not in every caller up the chain.
 - Use `debug` for high-frequency events (per-request, per-message) that are too noisy for `log`.
 
----
-
 ## 15. Code Style
 
 #### Formatting
-- **Indentation:** 4 spaces (match the existing codebase — override BalancyTeam's 2-space default)
+- **Indentation:** 4 spaces (match the existing codebase)
 - **Quotes:** Single quotes
 - **Semicolons:** Required
 - **Trailing commas:** Required in multiline arrays/objects
@@ -754,10 +700,8 @@ import { DcmSharedPaginationDto } from '../_shared/dtos/pagination.dto';
 - Methods do one thing. If a method name contains "and", split it.
 - Private methods that guard access start with `assert` (`assertContactAccess`).
 - Don't export things that aren't used outside the file.
-- No magic numbers — extract to named constants.
+- No magic numbers. Extract them to named constants.
 - No commented-out code in committed files.
-
----
 
 ## Quick Reference
 

@@ -11,4 +11,4 @@ agent: atlassian-researcher
 Research: $ARGUMENTS
 Research date: !`date +%Y-%m-%d`
 
-By default skip Confluence search — include it only if the user said "include Confluence", "check docs", or "full research".
+Skip Confluence unless the user said "include Confluence", "check docs", or "full research".

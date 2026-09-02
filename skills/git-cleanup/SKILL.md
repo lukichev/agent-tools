@@ -1,43 +1,43 @@
 ---
 name: git-cleanup
-description: Tidy local git state after upstream branches are merged or deleted — prune stale remote-tracking refs, convert clean worktrees back to plain branches, delete fully-merged branches whose remote is gone, review stashes, and retire agent memories for tickets that no longer have a local branch. Verifies work actually landed (survives squash-merges) before deleting anything, and never drops a stash or a memory without confirmation. Use when the user says "clean up my branches", "prune merged branches", "tidy git state", "remove old worktrees", "clean up agent memories", or after MRs have been merged.
+description: Tidy local git state after upstream branches are merged or deleted. Prunes stale remote-tracking refs, converts clean worktrees back to plain branches, deletes merged branches whose remote is gone, reviews stashes, and retires agent memories for tickets with no local branch. Verifies that work landed (survives squash-merges) before it deletes anything, and never drops a stash or a memory without confirmation. Use when the user says "clean up my branches", "prune merged branches", "tidy git state", "remove old worktrees", "clean up agent memories", or after MRs have been merged.
 disable-model-invocation: true
 ---
 
 # git-cleanup
 
-Reclaim local git state after merges. The guiding principle: **deleting is easy, recovering is not** — so verify before removing, and never destroy unrecoverable work (stashes, unmerged branches) without explicit sign-off. Always finish with a summary of what was pruned, converted, deleted, and left alone — and why.
+Reclaim local git state after merges. Verify before you remove. Never destroy a stash or an unmerged branch without explicit sign-off. Finish with a summary of what was pruned, converted, deleted and left alone, and why.
 
-Protected refs are never touched: the **current branch**, the repo's **default branch** (`main`/`master`), `production`, and `mr-<IID>` review worktrees with their branches and `refs/mr-review/<IID>` refs. Read the project's `CLAUDE.md` for any additional protected branch names before starting.
+Protected refs, never touched: the current branch, the default branch (`main`/`master`), `production`, and `mr-<IID>` review worktrees with their branches and `refs/mr-review/<IID>` refs. Read the project's `CLAUDE.md` for more protected branch names before you start.
 
 ## Setup
 
-Detect the default integration branch once — everything downstream compares against it:
+Detect the default branch once. Every later step compares against it:
 
 ```bash
 DEFAULT=$(git symbolic-ref --quiet refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
 DEFAULT=${DEFAULT:-main}   # fall back to main if origin/HEAD isn't set
 ```
 
-## Step 1 — Prune remote-tracking refs
+## Step 1 - Prune remote-tracking refs
 
-Sync with the remote and drop `origin/*` refs for branches deleted upstream. This is what makes the `: gone]` markers in later steps accurate.
+Drop `origin/*` refs for branches deleted upstream. This makes the `: gone]` markers in later steps accurate.
 
 ```bash
 git fetch --prune
 ```
 
-## Step 2 — Worktrees
+## Step 2 - Worktrees
 
 ```bash
 git worktree list --porcelain
 ```
 
-The **first** entry is the primary checkout — never remove it. Also never remove the worktree you're standing in (`git rev-parse --show-toplevel`).
+Never remove the first entry (the primary checkout) or the worktree you stand in (`git rev-parse --show-toplevel`).
 
-**Review worktrees** — `mr-<IID>` directories created by `/mr-review`, on a local branch of the same name — are **protected**, along with that branch and its `refs/mr-review/<IID>` ref. Leave all three and report each as intentionally skipped. A review is often resumed days later, and follow-up questions need the tree. The branch also reads as `: gone]` and unmerged, so the branch logic below would otherwise churn on it.
+**Review worktrees**, `mr-<IID>` directories from `/mr-review` on a branch of the same name, are protected with that branch and its `refs/mr-review/<IID>` ref. Leave all three and report each as skipped. The branch also reads as `: gone]` and unmerged, so the branch logic below must not touch it.
 
-Report the disk cost so the user can decide. A review tree is a full checkout:
+Report the disk cost of each review tree:
 
 ```bash
 du -sh <path>
@@ -49,38 +49,38 @@ The user removes one by hand:
 git worktree remove <path> && git branch -D "mr-<IID>" && git update-ref -d "refs/mr-review/<IID>"
 ```
 
-For every *other* worktree:
+For every other worktree:
 
-1. **Holds a protected branch?** If its branch is the default branch, `production`, or any protected name from `CLAUDE.md`, **leave it** — a worktree someone keeps for a protected branch is almost always deliberate. Note it as intentionally skipped.
-2. **Has unfinished work?** If `git -C <path> status --short` is non-empty (uncommitted changes *or* untracked files), or a stash references its branch (`git stash list` line mentioning the branch), **leave it and report it**. Removing it would strand that work.
-3. **Otherwise convert it to a regular branch** — drop the worktree directory while keeping the branch as a normal local branch:
+1. **Protected branch?** If its branch is the default branch, `production`, or a protected name from `CLAUDE.md`, leave it and report it as skipped.
+2. **Unfinished work?** If `git -C <path> status --short` is non-empty (uncommitted or untracked files), or a `git stash list` line names its branch, leave it and report it.
+3. **Otherwise convert it to a plain branch:**
    ```bash
    git worktree remove <path>
    ```
-   If `remove` fails (a locked worktree, or one containing a submodule), **do not `--force`** — report the failure and move on to the next worktree. Forcing could discard work the lock was protecting. On success the branch stays in `git branch`; then run the [merge check](#merge-verification) against it: if the branch is **gone on remote** (it'll show as `: gone]` after the prune) **and** its work has landed, delete it with `git branch -D <branch>`. If it's not gone or not merged, keep the branch and note it.
+   If `remove` fails (locked worktree, or one with a submodule), do not `--force`. Report the failure and continue. On success the branch stays in `git branch`. Run the [merge check](#merge-verification) on it. If the branch is `: gone]` after the prune and its work has landed, `git branch -D <branch>`. Otherwise keep the branch and report it.
 
-After removing worktrees, tidy any leftover administrative entries:
+Then tidy leftover entries:
 
 ```bash
 git worktree prune
 ```
 
-## Step 3 — Local branches whose upstream is gone
+## Step 3 - Local branches whose upstream is gone
 
 ```bash
 git branch -vv
 ```
 
-Collect branches marked `: gone]` (their tracked remote branch was deleted) — excluding protected refs and any already handled in Step 2. For each, **verify the work actually landed before deleting.**
+Collect branches marked `: gone]`, minus protected refs and those handled in Step 2. Verify that the work landed before you delete.
 
-Do **not** trust `git branch -d` ancestry or `git cherry` — a squash-merge collapses the branch's commits into one new commit on the default branch, so neither sees the original commits and both wrongly report "not merged." Compare *content* instead, via the merge check below.
+Do not trust `git branch -d` ancestry or `git cherry`. A squash-merge collapses the branch into one new commit, so both report "not merged". Compare content with the merge check below.
 
-- **Merged** (empty diff) → `git branch -D <branch>`.
-- **Not merged** (non-empty diff) → **never auto-delete.** Report it as unmerged work that needs a human decision. A `: gone]` branch with real unmerged changes is exactly the kind of thing that's painful to lose.
+- **Merged** (empty diff): `git branch -D <branch>`.
+- **Not merged** (non-empty diff): never auto-delete. Report it as unmerged work for a human decision.
 
 ### Merge verification
 
-For a branch, check whether everything it touched is already reflected in the default branch:
+Check whether every file the branch touched matches the default branch:
 
 ```bash
 MB=$(git merge-base origin/$DEFAULT <branch>)
@@ -92,20 +92,18 @@ else
 fi
 ```
 
-An **empty** final diff means the branch's versions of those files are identical to the default branch — fully merged (squash, rebase, or plain merge all collapse to this). **Non-empty** means there's still unmerged content; treat as not merged.
+An empty final diff means merged (squash, rebase or plain merge all collapse to this). A non-empty diff means not merged. Scoping the diff to the touched files keeps a busy `main` from hiding a clean merge, and a later `main` edit only keeps the branch.
 
-Why scope the diff to just those files: comparing only the files the branch touched ignores everything the default branch advanced independently, so an unrelated busy `main` doesn't mask a clean merge. The failure mode is one-directional and safe — if `main` later re-edited one of those files, the diff is non-empty and the branch is *kept*, never wrongly deleted.
+> A branch merged into a parent feature branch, not `$DEFAULT`, reads as unmerged here. Tell the user if they work with stacked branches.
 
-> Note: this compares against the default branch. A branch that was merged into a *parent* feature branch rather than `$DEFAULT` will read as unmerged here — which is the safe direction (reported, not deleted). If the user works with stacked branches, mention this so they can decide.
+## Step 4 - Local branches diverged from a live upstream
 
-## Step 4 — Local branches diverged from a live upstream
+After a server-side rebase or force-push, `git branch -vv` shows a live upstream with `[ahead N, behind M]`. The remote is authoritative. The local `ahead` commits are usually pre-rebase twins. Run the [merge check](#merge-verification) with the upstream in place of `origin/$DEFAULT`:
 
-After a server-side rebase or force-push, `git branch -vv` shows branches whose upstream still exists (not `: gone]`) but reads `[ahead N, behind M]`. The remote is authoritative; the local `ahead` commits are usually stale pre-rebase twins. Sync only after proving they add nothing the remote lacks — run the [merge check](#merge-verification) with the **upstream** in place of `origin/$DEFAULT`:
+- **Empty diff**: rebased twins, safe to reset the pointer to the upstream.
+- **Non-empty diff**: unique local commits. Keep and report. Never `git branch -f`, it discards them silently.
 
-- **Empty diff** → rebased twins, safe to hard-reset the pointer to the upstream.
-- **Non-empty diff** → unique local commits; keep and report. **Never force-move** — `git branch -f` discards them silently.
-
-Once all verified safe, sync in one pass (skips the current branch, then fast-forwards it):
+Once all are verified, sync in one pass (skips the current branch, then fast-forwards it):
 
 ```bash
 cur=$(git symbolic-ref --short HEAD)
@@ -115,44 +113,44 @@ done
 git merge --ff-only @{u}   # updates the branch you're standing on
 ```
 
-## Step 5 — Stashes
+## Step 5 - Stashes
 
 ```bash
 git stash list
 ```
 
-Stashes are the one thing here that's effectively unrecoverable once dropped, so **never drop one blindly, and never without explicit confirmation.** For each stash, gather evidence and assess whether its content already exists in the default branch:
+A dropped stash is unrecoverable. Never drop one without explicit confirmation. For each stash, gather evidence on whether its content is already in the default branch:
 
 ```bash
 git stash show --stat <stash>      # which files, how much
-git stash show -p <stash>          # the actual patch — pull out a few distinctive added lines
+git stash show -p <stash>          # the actual patch - pull out a few distinctive added lines
 ```
 
-To judge "already in main," check whether those distinctive added lines are present in the default branch's version of the affected files:
+Check whether those distinctive added lines exist in the default branch's version of the files:
 
 ```bash
 git show origin/$DEFAULT:<file> | grep -F "<distinctive added line>"
 ```
 
-Present each stash with: its summary line, the file stat, a couple of its distinctive added lines, and your assessment (**likely already merged** vs. **looks like unique unsaved work**). Then use `AskUserQuestion` to confirm which, if any, to drop — defaulting to keeping. Only on explicit approval:
+Present each stash with its summary line, file stat, a couple of distinctive added lines, and your assessment (**likely already merged** or **unique unsaved work**). Use `AskUserQuestion` to confirm which to drop, defaulting to keep. Only on explicit approval:
 
 ```bash
 git stash drop <stash>
 ```
 
-When unsure, keep it. A lingering stash costs nothing; a dropped one is gone.
+When unsure, keep it.
 
-## Step 6 — Agent memories for finished tickets
+## Step 6 - Agent memories for finished tickets
 
-Retire per-ticket memories in `.claude/agent-memory/atlassian-researcher/` (a `<TICKET-ID>/` dump per ticket) and `.claude/agent-memory/code-reviewer/` (flat files). Skip the step when neither directory exists.
+Retire per-ticket memories in `.claude/agent-memory/atlassian-researcher/` (a `<TICKET-ID>/` directory per ticket) and `.claude/agent-memory/code-reviewer/` (flat files). Skip the step when neither directory exists.
 
-Build the live ticket set from branch **names** only — a `git branch -v` line also carries the commit subject, so `main` would protect whatever ticket landed last:
+Build the live ticket set from branch names only. A `git branch -v` line also carries the commit subject, so `main` would protect the last ticket that landed:
 
 ```bash
 LIVE=$(git branch --format='%(refname:short)' | grep -oiE '[A-Z]{2,}-[0-9]+' | tr -d '-' | tr '[:lower:]' '[:upper:]' | sort -u)
 ```
 
-A memory is a candidate when it names at least one ticket and **none** of them is in `LIVE`. Collect its ids from the filename and the body, because an epic memory names its children:
+A memory is a candidate when it names at least one ticket and none of them is in `LIVE`. Collect ids from the filename and the body, because an epic memory names its children:
 
 ```bash
 grep -hoiE '[A-Z]{2,}-?[0-9]{4,}' <file> | tr -d '-' | tr '[:lower:]' '[:upper:]' | sort -u
@@ -160,16 +158,16 @@ grep -hoiE '[A-Z]{2,}-?[0-9]{4,}' <file> | tr -d '-' | tr '[:lower:]' '[:upper:]
 
 Two exclusions, read from the frontmatter `type:`:
 
-- `type: feedback` is never a candidate. A standing preference outlives the ticket that taught it.
-- A memory that names no ticket is never a candidate. It states a durable fact.
+- `type: feedback` is never a candidate. A standing preference outlives its ticket.
+- A memory that names no ticket is never a candidate.
 
-`.claude/` is git-ignored in most projects, so the delete has no undo. Confirm with `AskUserQuestion` exactly as for a stash, defaulting to keeping. List each candidate with its ticket ids and its `description:` line.
+`.claude/` is git-ignored in most projects, so the delete has no undo. Confirm with `AskUserQuestion` as for a stash, defaulting to keep. List each candidate with its ticket ids and its `description:` line.
 
 On approval, per memory: delete the file or the `<TICKET-ID>/` directory, delete its line from that agent's `MEMORY.md`, then clear dead links with `grep -rn "\[\[<deleted-name>\]\]" .claude/agent-memory/`. Never delete `MEMORY.md` itself.
 
 ## Summary
 
-Always close with a table of every item and its disposition:
+Close with a table of every item and its disposition:
 
 ```
 | Item                        | Type      | Action                  | Why                                  |
@@ -180,9 +178,9 @@ Always close with a table of every item and its disposition:
 | /tmp/wt-PROJ-1200           | worktree  | left alone              | uncommitted changes                  |
 | /tmp/mr-7008                | worktree  | left alone (88M)        | MR review tree, protected            |
 | PROJ-1099                   | branch    | deleted (branch -D)     | gone + content matches main          |
-| PROJ-1150                   | branch    | KEPT — unmerged         | gone on remote but diff non-empty    |
+| PROJ-1150                   | branch    | KEPT - unmerged         | gone on remote but diff non-empty    |
 | PROJ-1300                   | branch    | synced (branch -f)      | diverged; local commits are rebased twins on remote |
-| PROJ-1301                   | branch    | KEPT — unique local work| diverged; local-only commits not on remote |
+| PROJ-1301                   | branch    | KEPT - unique local work| diverged; local-only commits not on remote |
 | stash@{0}                   | stash     | dropped (confirmed)     | content already in main              |
 | stash@{1}                   | stash     | KEPT                    | unique unsaved work                  |
 | researcher/PROJ-1099        | memory    | deleted (confirmed)     | no local branch for PROJ-1099        |
@@ -191,14 +189,8 @@ Always close with a table of every item and its disposition:
 
 ## Rules
 
-Never do these. Each one destroys work with no undo:
-
-- Never delete a branch that is not both **gone on remote** and **proven merged** by content diff.
-- Never `git branch -f` a diverged branch until you prove its local commits add nothing the remote lacks.
-- Never `--force` a `git worktree remove`. If it fails, report and continue.
-- Never drop a stash without showing its content and getting confirmation. Default to keeping.
+- Never delete a branch that is not both gone on remote and proven merged by content diff.
+- Never `git branch -f` a diverged branch until its local commits are proven to add nothing.
+- Never `--force` a `git worktree remove`. Report the failure and continue.
+- Never drop a stash without showing its content and getting confirmation.
 - Never delete an agent memory without confirmation, and never delete a `type: feedback` one.
-
-Protected always: current branch, default branch, `production`, `mr-<IID>` review trees, plus any name in the project's `CLAUDE.md`.
-
-Explain each action as you go, and always end with the disposition summary.

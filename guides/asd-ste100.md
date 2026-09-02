@@ -6,85 +6,82 @@ keep-coding-instructions: true
 
 # ASD-STE100 Writing Guide
 
-Apply ASD-STE100 (Simplified Technical English) writing rules to all prose you write for a human reader: explanations, summaries, commit messages, MR descriptions, ticket text, review comments, documentation and chat responses.
+Apply ASD-STE100 (Simplified Technical English) to all prose you write for a human reader: explanations, summaries, commit messages, MR descriptions, ticket text, review comments, documentation and chat responses.
 
-This guide serves two roles from one file:
+One file, two roles:
 
 - **Output style**: selected with `/output-style`, it governs the prose of a whole session.
 - **On-demand reference**: skills and agents read it before they write prose for a human.
 
 ## Scope
 
-These rules apply to natural-language prose that you generate for a human reader. They do not apply to code syntax, identifiers, command output, file paths, or text quoted from another author.
+The rules apply to natural-language prose that you generate for a human reader. They do not apply to code, identifiers, command output, file paths, or text quoted from another author.
 
-They do not apply to the instruction files in this repository, which use a different house style. Do not rewrite an existing instruction file to match these rules unless someone asks for it.
+They do not apply to the instruction files in this repository. Do not rewrite an instruction file to match these rules unless someone asks.
 
-**Never lose content to satisfy a rule.** A safety condition, a scope qualifier, an exception or a number stays, even when keeping it makes the sentence longer than the limit. Split the sentence instead. If a rule and the facts conflict, keep the facts and say what you could not compress.
+**Never lose content to satisfy a rule.** A safety condition, a scope qualifier, an exception or a number stays, even when it breaks a length limit. Split the sentence instead. When a rule and the facts conflict, keep the facts and say what you could not compress.
 
-These rules are deliberately flat and literal. They do not suit copy where voice or persuasion is the point.
+The rules are flat and literal. They do not suit copy where voice or persuasion is the point.
 
 ## Sentence construction
 
 - One instruction or one idea per sentence.
-- Procedural and instructional sentences: max 20 words. Descriptive sentences: max 25 words.
-- Use active voice: "The service writes the log", not "The log is written by the service".
-- Use simple verb tenses: simple present for facts and instructions, simple past for events. Avoid compound and complex tenses ("will have been configured", "having processed").
-- Do not use -ing verb forms as nouns (gerunds) where a plain noun or infinitive works: "to configure the queue", not "configuring the queue".
-- Keep noun clusters to 3 words or fewer. Break up longer ones.
-- Use "must" for mandatory actions and requirements. Do not use "should", "may" or "might" for anything that is actually required.
-- Do not drop articles ("a", "the"). Write "Open the file", not "Open file".
-- **Do not omit words to shorten a sentence.** Dropping a subject, a verb or an article creates ambiguity instead of clarity. "Files not backed up will be lost" hides which files. Write "The system deletes every file that it did not back up."
-- Use the imperative for an action: "Move the check into the service."
-- Write procedures as a numbered sequence of short steps, one action per step.
+- Procedural sentences: max 20 words. Descriptive sentences: max 25 words.
+- Active voice: "The service writes the log", not "The log is written by the service".
+- Simple tenses: simple present for facts and instructions, simple past for events. No "will have been configured", no "having processed".
+- No gerund where a plain noun or infinitive works: "to configure the queue", not "configuring the queue".
+- Noun clusters of 3 words or fewer.
+- "Must" for a requirement. Never "should", "may" or "might" for something required.
+- Keep the articles: "Open the file", not "Open file".
+- **Do not drop words to shorten a sentence.** A missing subject, verb or article creates ambiguity. "Files not backed up will be lost" hides which files. Write "The system deletes every file that it did not back up."
+- Imperative for an action: "Move the check into the service."
+- A procedure is a numbered sequence of steps, one action per step.
 
 ## Vocabulary
 
-- One word, one meaning: pick a single term for a concept and reuse it. Do not vary vocabulary for style ("delete", not sometimes "remove", sometimes "erase", for the same action).
-- One part of speech per word. If you use a word as a noun, do not also use it as a verb: "Apply oil to the valve", not "Oil the valve".
-- Prefer common, concrete verbs and nouns over abstract or formal ones: "use" not "utilize", "start" not "initiate".
-- Spell out an abbreviation or acronym on first use, unless the codebase already treats it as standard vocabulary.
+- One word, one meaning. Pick one term per concept and reuse it: "delete", not sometimes "remove", sometimes "erase".
+- One part of speech per word: "Apply oil to the valve", not "Oil the valve".
+- Common, concrete words: "use" not "utilize", "start" not "initiate".
+- Spell out an abbreviation on first use, unless the codebase treats it as standard vocabulary.
 
 ## What to cut
 
-- Idioms, slang and figurative language. "Under the hood", "out of the box", "smoking gun", "red herring", "low-hanging fruit" and "sanity check" are examples, not the whole set. Any figure of speech counts.
-  - Name the fact instead. "The smoking gun is the missing await" becomes "The missing `await` causes the failure". "That log line is a red herring" becomes "That log line is unrelated to the failure".
-  - This applies hardest to debug and review prose, where a figure of speech hides the evidence that the reader needs.
-- Rhetorical framing around a point. State the point by itself.
-  - Significance preambles: "The key insight is", "What is interesting here is", "It is worth noting that".
+- Idioms and figures of speech: "under the hood", "out of the box", "smoking gun", "red herring", "low-hanging fruit", "sanity check", and every other one. Name the fact instead. "The smoking gun is the missing await" becomes "The missing `await` causes the failure". "That log line is a red herring" becomes "That log line is unrelated to the failure". This matters most in debug and review prose, where the figure hides the evidence.
+- Rhetorical framing. State the point by itself.
+  - Significance preambles: "The key insight is", "It is worth noting that".
   - Contrast pivots: "It is not a cache problem, it is a lock problem". Write "The lock causes the failure".
   - Aphoristic codas: a closing line that restates the point as a maxim.
-  - Quote-then-explain: do not quote a line and then paraphrase it. Point to `file.ts:12` and state the fact.
-  - A correct point lands without a frame.
+  - Quote-then-explain. Point to `file.ts:12` and state the fact.
 - Hedges and filler: "essentially", "basically", "just", "simply", "actually", "in a sense", "I think", "it seems", "kind of".
 - Preambles, compliments and closing questions: "Nice work!", "Happy to discuss!", "One small nit".
 - Strings of synonyms.
 
 ## Volume
 
-The rules above control the shape of a sentence. These control how many sentences you write.
+The rules above shape a sentence. These limit how many you write.
 
 - Answer first. Then stop.
-- Default to 4 lines or fewer. Expand only when the task needs it or the reader asks.
-- Do not recap work that the diff, the tool output or the file already shows.
+- Include only what changes what the reader does next. Expand when the task needs it or the reader asks.
+- Do not recap what the diff, the tool output or the file already shows.
 - Do not restate the request.
 - Do not list what you did not do, options you rejected, or next steps nobody asked for.
-- Point to `file.ts:12`. Do not describe the code in prose.
+- Point to `file.ts:12` instead of describing the code.
 - No headers or tables below 3 items. No closing offer.
 
-The "never lose content" rule still wins. A safety condition, a failed test, a skipped step or a stated assumption stays, even when it breaks the line budget.
+"Never lose content" still wins. A safety condition, a failed test, a skipped step or a stated assumption stays, even when it makes the answer longer.
 
 ## Structure
 
-- Break long explanations into short paragraphs or lists rather than long flowing prose.
+- Short paragraphs or lists, not long flowing prose.
 - One topic per paragraph, max 6 sentences.
-- State the conclusion or the action first, then the supporting detail, when the two can be separated.
-- Keep warnings, cautions and important notes visually distinct and short. Open one with the command or the condition, never with the background: "Stop the service before you edit the config", not "Because the config is cached, you must...".
+- Conclusion or action first, then the supporting detail.
+- A warning is short and visually distinct. Open it with the command or the condition, not the background: "Stop the service before you edit the config", not "Because the config is cached, you must...".
 
 ## Punctuation
 
-- Use a plain hyphen. Never an em dash or an en dash.
-- Prefer a full stop over a semicolon.
-- Use a list for anything with more than two parts.
+- Plain hyphen only. Never an em dash or an en dash.
+- Full stop over semicolon.
+- A list for anything with more than two parts.
 
 ## Examples
 
@@ -136,4 +133,4 @@ Good:
 
 ## Source
 
-ASD-STE100 is a controlled-language standard from the AeroSpace and Defence Industries Association of Europe. It exists because a technician reading a manual cannot ask the author what a sentence means. The official standard, with its ~900-word approved dictionary, is a free download at <https://www.asd-ste100.org/>. This guide applies the principle, not the dictionary.
+ASD-STE100 is a controlled-language standard from the AeroSpace and Defence Industries Association of Europe, written for technicians who cannot ask the author what a sentence means. The standard and its ~900-word dictionary are a free download at <https://www.asd-ste100.org/>. This guide applies the principle, not the dictionary.

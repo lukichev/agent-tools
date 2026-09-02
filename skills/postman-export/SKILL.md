@@ -7,15 +7,14 @@ disable-model-invocation: true
 
 # Postman Export
 
-Generate a Postman Collection v2.1 JSON file from API endpoints. Scans the current branch diff (or a specified module/path) and writes a `.postman_collection.json` file to `.claude/scratch/`.
+Generate a Postman Collection v2.1 JSON file from the API endpoints in the current branch diff, or in a given module or path. Write it to `.claude/scratch/`.
 
 ## Workflow
 
 ### 1. Determine Scope
 
-Check what the user wants endpoints for:
-- **Current branch** (default): diff against `main` to find new/modified controllers/routes
-- **Specific module**: user provides a path or module name
+- **Current branch** (default): diff against `main` for new or modified controllers and routes
+- **Specific module**: the path or module name the user gave
 
 ```bash
 git branch --show-current  # for output filename
@@ -26,45 +25,42 @@ git diff main...HEAD --name-only -- '**/*controller*' '**/*route*' '**/*handler*
 
 Read the project's `CLAUDE.md` for framework, routing conventions, auth mechanism, and API structure.
 
-Then check for project-level Postman conventions:
+Check for project-level Postman conventions:
 ```bash
-# Look for project-specific collection format rules
 find .claude -name 'postman*' -o -name 'POSTMAN*' 2>/dev/null
 ```
-If a conventions file exists, read it and follow those rules (auth scheme, host variable, collection shell, folder structure, etc.). They override the defaults in this skill.
+If a conventions file exists, follow it (auth scheme, host variable, collection shell, folder structure). It overrides the defaults below.
 
 ### 3. Read Controllers/Routes
 
 For each endpoint file, extract:
 - Base path (class-level route decorator or prefix)
-- Whether it's excluded from any global prefix
+- Exclusion from any global prefix
 - Each HTTP method and route
 - Route params (`:id`, path variables) and their validators
-- Request body schema/DTO class reference
-- Query parameter schema/DTO class reference
-- Status codes if explicitly set (otherwise use framework defaults)
-- Auth/role requirements
+- Request body DTO or schema reference
+- Query parameter DTO or schema reference
+- Status codes when set explicitly, else framework defaults
+- Auth and role requirements
 
 ### 4. Read DTOs/Schemas
 
 For each referenced DTO, schema, or model class:
 - Find the source file
 - Extract fields, types, validators, defaults, and transforms
-- Check for base class inheritance (e.g., pagination base adds `limit`/`offset`)
+- Check base class inheritance (a pagination base adds `limit` and `offset`, for example)
 
-### 5. Generate Postman Collection JSON
+### 5. Write the Collection
 
 Write to `.claude/scratch/<BRANCH-NAME>.postman_collection.json`.
 
 ### 6. Output
 
-After writing the file, tell the user the path and that they can import it via Postman > Import > File.
-
----
+Tell the user the path and that Postman > Import > File loads it.
 
 ## Collection Format Defaults
 
-Use Postman Collection v2.1 schema. These defaults apply when no project-level conventions file exists.
+Postman Collection v2.1 schema. These apply when no project-level conventions file exists.
 
 ### Collection Shell
 
@@ -85,21 +81,21 @@ Use Postman Collection v2.1 schema. These defaults apply when no project-level c
 
 ### Non-Obvious Format Rules
 
-These are easy to get wrong — standard v2.1 knowledge is assumed.
+Standard v2.1 knowledge is assumed. These are the rules that are easy to get wrong.
 
 - **Auth inheritance**: set auth at collection level. Do NOT set `auth` on individual requests unless overriding. Use `"auth": { "type": "noauth" }` for unauthenticated endpoints.
-- **`raw` URL**: optional query params are NOT appended in the request template — only in `originalRequest` inside response examples (with values filled in).
-- **Path variables**: keep `:` prefix in path array (e.g., `":accountId"`). Always include `description` on every path variable.
-- **Query params**: all params (required and optional) go in the `query` array. Set `"disabled": true` for optional ones.
-- **Description format** for path vars and query params: `"Type | Required/Optional | Constraint"` — include enum values where applicable (e.g., `"ASC | DESC"`).
-- **JSON body**: always include `options.raw.language: "json"`. JSON comments (`// description`) are allowed in `raw` for inline field docs.
+- **`raw` URL**: optional query params are NOT appended in the request template, only in `originalRequest` inside response examples (with values filled in).
+- **Path variables**: keep the `:` prefix in the path array (`":accountId"`). Include `description` on every path variable.
+- **Query params**: all params, required and optional, go in the `query` array. Set `"disabled": true` for optional ones.
+- **Description format** for path vars and query params: `"Type | Required/Optional | Constraint"`. Include enum values where applicable (`"ASC | DESC"`).
+- **JSON body**: include `options.raw.language: "json"`. JSON comments (`// description`) are allowed in `raw` for inline field docs.
 - **Formdata file fields**: use `"type": "file"` with `"src": ""`. Do NOT use `postman-cloud://` URLs.
 - **GET with empty body**: add `"protocolProfileBehavior": { "disableBodyPruning": true }` at the request-item level.
 - **Response examples**: at least one success response per endpoint. `originalRequest` is a full copy of the request with all values filled in. Include error responses (400, 404) for notable error cases.
-- **One request per endpoint** — list all query params on a single request item.
+- **One request per endpoint**: list all query params on a single request item.
 
 ## General Rules
 
-- Always read actual controller/route and DTO/schema source — never guess fields or types
-- For paginated endpoints, include pagination params with defaults
-- Body field descriptions can use `//` comments inside raw JSON or go in the endpoint description
+- Read the controller, route, DTO and schema source. Never guess fields or types.
+- For paginated endpoints, include pagination params with defaults.
+- Body field descriptions go in `//` comments inside raw JSON or in the endpoint description.

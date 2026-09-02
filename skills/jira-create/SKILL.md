@@ -1,22 +1,20 @@
 ---
 name: jira-create
-description: Create a Jira ticket with standard format (title, Summary, AC, Dev Notes). Shows draft for approval before creating. Use when the user wants to file a bug, create a story, log a task, or track work in Jira — even if they don't say "Jira" explicitly.
+description: Create a Jira ticket with standard format (title, Summary, AC, Dev Notes). Shows the draft for approval before creating. Use when the user wants to file a bug, create a story, log a task, or track work in Jira, even if they don't say "Jira" explicitly.
 argument-hint: "<domain and feature area>"
 disable-model-invocation: true
 ---
 
 # Jira Create
 
-Create Jira tickets following the standard format.
-
 ## Workflow
 
 1. Use `AskUserQuestion` to gather:
-   - Domain and feature area (for title)
-   - Brief description of the issue/feature
-   - Any related tickets or error tracking issues
-2. Draft the ticket content and show to user
-3. After approval, create via Atlassian MCP
+   - Domain and feature area (for the title)
+   - Description of the issue or feature
+   - Related tickets or error tracking issues
+2. Draft the ticket and show it to the user
+3. After approval, create it via Atlassian MCP
 4. Return the new ticket ID
 
 ## Title Format
@@ -25,9 +23,9 @@ Create Jira tickets following the standard format.
 [Domain - Feature Area] Brief Title
 ```
 
-Derive domain and feature area from the project's module/service structure. Read `CLAUDE.md` for terminology and module names.
+Derive domain and feature area from the project's module structure. Read `CLAUDE.md` for terminology and module names.
 
-**Examples:**
+Examples:
 - `[Backend - Auth] Fix expired session handling`
 - `[Frontend - Dashboard] Add notification indicator`
 - `[API - Billing] Handle subscription downgrade edge case`
@@ -36,19 +34,19 @@ Derive domain and feature area from the project's module/service structure. Read
 
 ## Description Format
 
-Use the template from `ticket-template.md` in this skill folder as the base (Summary + AC). Then add conditional sections based on ticket type:
+Start from `ticket-template.md` in this skill folder (Summary + AC):
 
 | Placeholder | Replace with |
 |-------------|--------------|
-| `{{SUMMARY}}` | 1-2 sentences explaining the fix/change |
+| `{{SUMMARY}}` | 1-2 sentences explaining the fix or change |
 | `{{AC_ITEM_N}}` | Acceptance criterion |
 | `{{AC_DETAIL}}` | Sub-detail if needed |
 
 ### Conditional Sections
 
-Add these sections **after AC** only when relevant:
+Add after the AC, only when relevant.
 
-**Steps to Reproduce** — Include for Bug tickets when reproduction steps are known:
+**Steps to Reproduce** - for a Bug when the steps are known:
 ```
 ## Steps to Reproduce
 
@@ -57,7 +55,7 @@ Add these sections **after AC** only when relevant:
 3. Observe the issue
 ```
 
-**Dev Notes** — Include only when the root cause and solution are already known (typically developer-authored bug fixes). Omit for stories, tasks, and bugs where the cause is unknown:
+**Dev Notes** - only when the root cause and solution are known. Omit for stories, tasks, and bugs with an unknown cause:
 ```
 ## Dev Notes
 
@@ -66,27 +64,25 @@ Root cause: why the bug exists
 Solution: brief description of the fix
 ```
 
-If an error tracking ID is available (e.g., Sentry issue), mention it in Dev Notes.
+Mention an error tracking ID (a Sentry issue, for example) in Dev Notes when one exists.
 
-## QA Section (Optional)
-
-For UI/frontend changes, add a **QA — Affected Pages** section listing all pages that need visual testing. Include route paths and what to verify on each page. Add this section when user requests it or when changes touch multiple UI pages.
+**QA - Affected Pages** - for UI changes, when the user asks or the change touches several pages. List each page with its route and what to verify.
 
 ## Ticket Style
 
 Read `~/.claude/guides/asd-ste100.md` and write the title, Summary, AC, Steps to Reproduce, Dev Notes and QA to those rules. The reader is a developer who picks the ticket up cold, weeks later.
 
-Per-section limits:
-
-| Section | Limit |
+| Section | Shape |
 |---------|-------|
-| Title | Max 10 words after the `[Domain - Feature Area]` prefix |
-| Summary | 1-2 sentences, max 25 words each |
-| AC item | 1-2 sentences, max 20 words each, one observable behavior |
-| Steps | 1 action per step, imperative, max 15 words |
-| Dev Notes | 1 sentence for the root cause, 1 for the solution |
+| Title | Short, after the `[Domain - Feature Area]` prefix |
+| Summary | 1-2 sentences |
+| AC item | 1-2 sentences, one observable behavior |
+| Steps | One imperative action per step |
+| Dev Notes | One sentence for the root cause, one for the solution |
 
-Write each AC in the present tense, as a statement of the finished behavior: "The export button downloads a CSV file." Do not write an AC as a task ("Add a download button") or as a wish ("Users should be able to export").
+Each AC is testable on its own and describes one observable behavior. "X works like before" and "No regressions" are not AC.
+
+Write each AC in the present tense, as a statement of the finished behavior: "The export button downloads a CSV file." Not a task ("Add a download button"), not a wish ("Users should be able to export").
 
 Bad:
 
@@ -96,17 +92,10 @@ Good:
 
 > A user with two active sessions signs out of one session. The other session stays active.
 
-## AC Quality Rules
-
-- AC must be **explicit and testable**. Vague criteria like "X works like before" or "No regressions" are not acceptable AC.
-- Each AC item must describe a specific, observable behavior or outcome that can be verified independently.
-
-## Important
-
-- If an MR already exists for the changes, append the new ticket ID to its description per `/mr-create`.
+If an MR already exists for the change, append the new ticket ID to its description per `/mr-create`.
 
 ## Related Skills
 
-- Use `/atlassian-research` to research an existing ticket before creating a new one
-- Use `/git-commit` to stage and commit with the new ticket ID
-- Use `/git-publish` to commit, push, and create MR in one flow
+- `/atlassian-research` - research an existing ticket before creating a new one
+- `/git-commit` - commit with the new ticket ID
+- `/git-publish` - commit, push, and create the MR

@@ -7,34 +7,32 @@ disable-model-invocation: true
 
 # Skill Creator
 
-Create new skills and iteratively improve existing ones.
+## Process
 
-## Process Overview
-
-1. Capture what the skill should do and when it should trigger
+1. Capture what the skill does and when it triggers
 2. Write a draft SKILL.md
-3. Test with realistic prompts, evaluate results
-4. Improve based on feedback, repeat until satisfied
-5. Optimize the description for reliable triggering
+3. Test with realistic prompts
+4. Improve from the results, repeat
+5. Optimize the description for triggering
 
-Be flexible — the user may already have a draft, may want to skip testing, or may just want to vibe. Meet them where they are.
+The user may already have a draft or may skip testing. Start where they are.
 
 ## Capture Intent
 
-Understand what the user wants before writing anything. If the conversation already contains a workflow the user wants to capture (e.g., "turn this into a skill"), extract answers from history first — tools used, sequence of steps, corrections made, input/output formats observed.
+If the conversation already holds the workflow ("turn this into a skill"), extract from history first: tools used, sequence of steps, corrections made, input and output formats.
 
-Questions to resolve:
-1. What should this skill enable Claude to do?
-2. When should it trigger? (what user phrases/contexts)
-3. What's the expected output format?
-4. Are there edge cases worth handling?
+Resolve:
+1. What does the skill enable Claude to do?
+2. When does it trigger? Which user phrases and contexts?
+3. What is the output format?
+4. Which edge cases matter?
 
 ## Skill Anatomy
 
 ```
 skill-name/
-├── SKILL.md          (required — frontmatter + instructions)
-└── references/       (optional — large docs, templates, schemas)
+├── SKILL.md          (required: frontmatter + instructions)
+└── references/       (optional: large docs, templates, schemas)
 ```
 
 ### Frontmatter
@@ -52,70 +50,66 @@ agent: agent-name                # which agent to use with context: fork
 ---
 ```
 
-Only `description` is recommended. All other fields are optional.
+Only `description` is recommended. The rest is optional.
 
 | Field | Purpose |
 |-------|---------|
 | `name` | Display name and `/slash-command`. Lowercase, hyphens, max 64 chars |
-| `description` | What + when. Claude uses this to decide when to auto-load |
-| `argument-hint` | Shown during autocomplete (e.g., `<MR number>`) |
-| `disable-model-invocation` | Set `true` to prevent Claude from auto-triggering. Default: `false` |
-| `user-invocable` | Set `false` to hide from `/` menu. Use for background knowledge |
+| `description` | What + when. Claude uses it to decide when to auto-load |
+| `argument-hint` | Shown during autocomplete, for example `<MR number>` |
+| `disable-model-invocation` | `true` prevents Claude from auto-triggering. Default `false` |
+| `user-invocable` | `false` hides the skill from the `/` menu. For background knowledge |
 | `allowed-tools` | Restrict which tools Claude can use |
-| `context` | `fork` to run in isolated subagent context |
-| `agent` | Subagent type for `context: fork` (built-in or custom from `.claude/agents/`) |
+| `context` | `fork` runs the skill in an isolated subagent |
+| `agent` | Subagent type for `context: fork`, built-in or from `.claude/agents/` |
 
 ### String substitutions
 
 | Variable | Description |
 |----------|-------------|
-| `$ARGUMENTS` | All arguments passed when invoking |
-| `$ARGUMENTS[N]` or `$N` | Specific argument by 0-based index |
+| `$ARGUMENTS` | All arguments passed on invocation |
+| `$ARGUMENTS[N]` or `$N` | Argument by 0-based index |
 | `${CLAUDE_SESSION_ID}` | Current session ID |
 
 ### Dynamic context injection
 
-Prefix a backtick-wrapped shell command with `!` to inject its output before the skill reaches Claude. The command runs immediately and its output replaces the placeholder. See `atlassian-research/SKILL.md` for a working example.
+Prefix a backtick-wrapped shell command with `!` to inject its output before the skill reaches Claude. See `atlassian-research/SKILL.md` for an example.
 
 ### Progressive Disclosure
 
 Skills load in three levels:
-1. **Metadata** (name + description) — always in context (~100 words)
-2. **SKILL.md body** — loaded when skill triggers (target < 500 lines)
-3. **Bundled references** — loaded on demand (unlimited size)
+1. **Metadata** (name + description): always in context, about 100 words
+2. **SKILL.md body**: loaded when the skill triggers, target under 500 lines
+3. **Bundled references**: loaded on demand, unlimited size
 
-Keep the body lean. If approaching 500 lines, split detailed reference material into `references/` with clear pointers about when to read them.
+Near 500 lines, move reference material into `references/` and say when to read each file.
 
 ## Writing Guide
 
 ### Prose the skill generates
 
-If the skill writes prose for a human — a comment, a description, a ticket, a report — give it a line pointing at `~/.claude/guides/asd-ste100.md`. Do not restate the rules in the skill. Add only the limits that are specific to the artifact, such as a word cap or a section structure.
+If the skill writes prose for a human (a comment, a description, a ticket, a report), point at `~/.claude/guides/asd-ste100.md`. Do not restate the rules. Add only limits specific to the artifact, such as a word cap or a section structure.
 
 A skill that only runs commands or edits code needs no pointer.
 
 ### Descriptions that trigger well
 
-The description is the primary mechanism that determines whether Claude invokes a skill. Claude tends to under-trigger, so descriptions should be slightly pushy — include both what the skill does AND specific contexts for when to use it.
+The description decides whether Claude invokes the skill. Claude under-triggers, so include both what the skill does and the contexts where it applies.
 
 Bad: `"Create Jira tickets."`
-Good: `"Create a Jira ticket with standard format (title, Summary, AC, Dev Notes). Shows draft for approval before creating. Use when the user wants to file a bug, create a story, or log a task in Jira — even if they don't say 'Jira' explicitly."`
+Good: `"Create a Jira ticket with standard format (title, Summary, AC, Dev Notes). Shows draft for approval before creating. Use when the user wants to file a bug, create a story, or log a task in Jira - even if they don't say 'Jira' explicitly."`
 
-### Explain the why, not just the what
+### Explain the why
 
-Today's LLMs are smart. They have good theory of mind and when given a good harness can go beyond rote instructions. Instead of heavy-handed MUSTs and NEVERs, explain the reasoning so the model understands why something matters. That's more effective than rigid rules.
-
-Yellow flag: if you're writing ALWAYS or NEVER in all caps repeatedly, try reframing as an explanation of why the thing is important.
-
-When a hard constraint genuinely exists (e.g., "never replace an existing MR's title"), bold it and keep it — but make sure the reasoning is nearby.
+State the reason behind a rule instead of a bare MUST or NEVER. Repeated ALWAYS or NEVER in capitals is a sign to reframe. Keep a hard constraint ("never replace an existing MR's title") in bold, with the reason beside it.
 
 ### Use imperative form
 
-Write instructions as commands: "Stage files", "Check for existing MR", "Show the draft to the user". Not "You should stage files" or "The skill will check for existing MR".
+"Stage files", "Check for existing MR", "Show the draft to the user". Not "You should stage files" or "The skill will check".
 
-### Examples matter
+### Examples
 
-Include concrete input/output examples. They communicate intent better than abstract rules:
+Concrete input and output examples carry intent better than abstract rules:
 
 ```markdown
 **Example:**
@@ -125,15 +119,15 @@ Output: feat(auth): implement JWT-based authentication
 
 ### Keep it lean
 
-Remove instructions that aren't pulling their weight. Read transcripts of the skill in action — if the model wastes time on unproductive steps, cut the instructions causing that. Every line should earn its place.
+Read transcripts of the skill in action. If the model wastes time on a step, cut the instruction that causes it.
 
-### Generalize, don't overfit
+### Generalize
 
-Skills get used across many prompts and projects. Avoid fiddly changes that only work for specific examples. Instead of oppressively constrictive rules, use different metaphors or recommend different patterns. If a skill is project-agnostic, keep it that way.
+Skills run across many prompts and projects. Avoid rules that only fit one example. Keep a project-agnostic skill project-agnostic.
 
 ### Domain organization
 
-When a skill supports multiple frameworks or domains, organize by variant:
+When a skill supports several frameworks, organize by variant, and Claude reads only the matching file:
 
 ```
 skill-name/
@@ -144,27 +138,23 @@ skill-name/
     └── fastapi.md
 ```
 
-Claude reads only the relevant reference file.
-
 ## Testing
 
-After writing a draft, create 2-3 realistic test prompts — the kind of thing a real user would actually say. Run the skill on them and evaluate:
+Write 2-3 realistic test prompts. Run the skill on them and check:
 
 - Did it produce the right output?
-- Did it follow the workflow without getting lost?
-- Did it waste time on unnecessary steps?
+- Did it follow the workflow without losing its place?
+- Did it spend time on unneeded steps?
 
-Iterate: improve the skill, rerun tests, repeat until results are solid.
+Improve, rerun, repeat.
 
 ## Description Optimization
 
-After the skill is working well, optimize the description for triggering accuracy:
+Once the skill works:
 
-1. **Write 16-20 eval queries** — a mix of should-trigger (8-10) and should-not-trigger (8-10)
-2. Queries must be realistic and detailed, not abstract. Include file paths, personal context, casual speech, typos
-3. Should-not-trigger queries should be near-misses that share keywords but need something different — not obviously irrelevant
-4. Test the description against these queries and adjust wording to improve triggering accuracy
+1. Write 16-20 eval queries: 8-10 should-trigger, 8-10 should-not-trigger
+2. Make them realistic and detailed: file paths, personal context, casual speech, typos
+3. Make should-not-trigger queries near-misses that share keywords but need something else
+4. Test the description against them and adjust the wording
 
-### Understanding triggering
-
-Skills appear in Claude's available skills list with their name + description. Claude only consults skills for tasks it can't easily handle on its own — simple one-step queries may not trigger even with a perfect description match. Complex, multi-step, or specialized queries reliably trigger when the description matches. Design eval queries that are substantive enough to warrant consulting a skill.
+Claude consults skills only for tasks it cannot handle in one step, so a simple query may not trigger even a matching description. Write eval queries substantive enough to warrant a skill.

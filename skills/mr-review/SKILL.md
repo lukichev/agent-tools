@@ -6,17 +6,15 @@ argument-hint: "<MR number or URL>"
 
 # MR Review
 
-Review a merge request end to end, read-only. Mostly used on **other people's MRs**.
+Review a merge request end to end, read-only. Built for other people's MRs.
 
-Two checks come from `~/.claude/skills/ready-check/references/`: `ac-coverage.md` and `debug-artifacts.md`. Read them where the steps say so. Never read `ready-check/SKILL.md` itself, it reads the local tree and gates on the user.
+Two checks come from `~/.claude/skills/ready-check/references/`: `ac-coverage.md` and `debug-artifacts.md`. Read them where the steps say so. Never read `ready-check/SKILL.md` itself: it reads the local tree and gates on the user.
 
-Read `~/.claude/guides/glab-api.md` before you call `glab`. It holds the flag limits and the API traps that make a wrong result look like a right one.
-
-Needs `glab` authenticated. Atlassian MCP is optional.
+Read `~/.claude/guides/glab-api.md` before you call `glab`. Needs `glab` authenticated. Atlassian MCP is optional.
 
 ## 1. Fetch MR metadata
 
-Parse the MR number from `$ARGUMENTS` (bare number or full URL). First, one call:
+Parse the MR number from `$ARGUMENTS` (bare number or URL). One call first:
 
 ```bash
 glab mr view <IID> --output json
@@ -24,9 +22,9 @@ glab mr view <IID> --output json
 
 Keep: `source_branch`, `target_branch`, `author`, `state`, `draft`, `title`, `description`, `changes_count`, `diff_refs.base_sha`, `diff_refs.start_sha`, `diff_refs.head_sha`, `detailed_merge_status`, `has_conflicts`, `diverged_commits_count`, `head_pipeline.status`.
 
-**Draft: stop here.** `draft` true, or a title starting with `Draft:`, cancels the review before anything expensive. Continue only if the user explicitly asked for a draft review.
+**Draft: stop here.** `draft` true, or a title starting with `Draft:`, ends the review. Continue only if the user asked for a draft review.
 
-Past the gate, run these three in parallel. **Filter in the pipe, not in your context** — an unfiltered diffs response carries the full body of every changed file, and you need only the paths:
+Then run these three in parallel. Filter in the pipe, not in your context:
 
 ```bash
 glab api "projects/:fullpath/merge_requests/<IID>/discussions?per_page=100" \
@@ -37,7 +35,7 @@ glab api "projects/:fullpath/merge_requests/<IID>/approvals" \
   | jq '{approved, approvals_required, approvals_left, approved_by, approval_rules_left}'
 ```
 
-Each filter matters: the discussions one drops system notes, which otherwise invent prior feedback. The diffs one turns hundreds of KB into a file list. The approvals one cuts an 11 KB payload of avatars down to 5 fields.
+The discussions filter drops system notes, which otherwise read as prior feedback. The diffs filter reduces the full body of every changed file to a path list. The approvals filter cuts an 11 KB payload to 5 fields.
 
 ## 2. Check the MR head out in a worktree
 
@@ -49,9 +47,9 @@ git worktree add -B "mr-<IID>" "$WT" "refs/mr-review/<IID>"
 git -C "$WT" rev-parse HEAD          # must equal diff_refs.head_sha
 ```
 
-- Fetch the **MR ref**, not `origin/<source_branch>`: the local branch may be stale, and the source may be a fork.
-- The worktree carries a real local branch named `mr-<IID>`, so `git branch -v` lists it. Never name it after the author's branch: that name collides with the user's own checkout of the same ticket. `-B` resets the branch when the author pushes.
-- If `$WT` exists, reuse it when HEAD matches `head_sha`. Otherwise the author pushed, so `git worktree remove "$WT"` and recreate. If `remove` refuses, someone edited the tree by hand: report it, never force.
+- Fetch the MR ref, not `origin/<source_branch>`: the local branch may be stale, and the source may be a fork.
+- The worktree branch is `mr-<IID>`, so `git branch -v` lists it. Never name it after the author's branch: that collides with the user's own checkout of the ticket. `-B` resets the branch when the author pushes.
+- If `$WT` exists and HEAD matches `head_sha`, reuse it. Otherwise `git worktree remove "$WT"` and recreate. If `remove` refuses, someone edited the tree by hand: report it, never force.
 - `git -C` is correct here. The project rule against it covers the repo root.
 - No `node_modules` in the worktree. No build, lint or tests inside it.
 
@@ -71,22 +69,22 @@ Reviewer count scales off `changes_count` (a string, sometimes `"1000+"`):
 | 41 - 120 | 2 to 3, split by top-level area |
 | > 120 or `1000+` | one per area, cap 6 |
 
-Split on leading path segments (`src/_nest/identity`, `apps/portal`). Each reviewer gets its file subset and the identical rules. Merge findings and drop duplicates afterwards. **Migrations always get a dedicated reviewer** at any size: foreign-key reasoning needs the whole set, not a slice. Declare any capped area in the output, a silent cap reads as full coverage.
+Split on leading path segments (`src/_nest/identity`, `apps/portal`). Each reviewer gets its file subset and the identical rules. Merge findings and drop duplicates afterwards. **Migrations always get a dedicated reviewer** at any size: foreign-key reasoning needs the whole set. Declare any capped area in the output. A silent cap reads as full coverage.
 
 **4a. `code-reviewer`**, default model, self-contained prompt carrying:
 
 - MR number, title, author, `source_branch` → `target_branch`, state, its file subset
 - The description, labelled as the author's claims
-- **The worktree path, which IS the MR state.** Read and grep there, never the primary tree, which holds another branch.
+- **The worktree path, which is the MR state.** Read and grep there, never the primary tree, which holds another branch.
 - **Pre-change state is `git show <base_sha>:<path>`**, from `diff_refs.base_sha`. Not `main`, not `<target_branch>`: either can sit hundreds of files from the diff base.
 - Unresolved discussions, one line each, so it does not repeat existing feedback
 - Focus areas from what the MR touches. Call out migrations, auth, deletes, schema changes.
-- Rules: no finding from the diff alone; verify against worktree source; check whether nearby code or tests already cover it; drop false positives; run completeness greps repo-wide **inside the worktree**; skip non-standard style; state which author testing claims you verified and which you could not
+- Rules: no finding from the diff alone; verify against worktree source; check whether nearby code or tests already cover it; drop false positives; run completeness greps repo-wide inside the worktree; skip non-standard style; state which author testing claims you verified and which you could not
 - Output: numbered list, each with `file:line`, a category (bug / security / performance / data-safety / testing / style), a one-line failure scenario, a one-line fix. No essays.
 
-**Never pass the ticket to a reviewer.** Independence is the point: they judge the code, the orchestrator judges it against the ACs in step 5.
+**Never pass the ticket to a reviewer.** They judge the code. The orchestrator judges it against the ACs in step 5.
 
-**4b. `atlassian-researcher`** - the ticket ID. Ask for ACs, dev notes, linked tickets, decisions in comments. Confluence off unless requested.
+**4b. `atlassian-researcher`**: the ticket ID. Ask for ACs, dev notes, linked tickets, decisions in comments. Confluence off unless requested.
 
 ## 5. AC coverage
 
@@ -108,9 +106,9 @@ From step 1 data only. Do not re-fetch.
 
 ## Output
 
-Read `~/.claude/guides/asd-ste100.md` and write every line to those rules. A finding here is the same content `/mr-comment` posts, so it must already read as a postable comment.
+Read `~/.claude/guides/asd-ste100.md` and write every line to those rules. A finding is the content `/mr-comment` posts, so it must already read as a postable comment.
 
-Terse: tables and lists, no prose, no preamble, no closing paragraph, no restatement of the description. These blocks, nothing else.
+Output exactly the blocks below, in this order.
 
 ```markdown
 ## !<IID> <TITLE>
@@ -138,10 +136,10 @@ Conflicts <yes|no> · behind target <n> · approvals <n>/<required> · tests <to
 Fix: <one line>
 
 ### Checked and sound
-- <one line each, max 5>
+- <one line each>
 
 ### Not verified
-- <one line each, max 5> - <why>
+- <one line each> - <why>
 
 ## Verdict
 Blockers <n> · Suggestions <n> · AC <n>/<n> · Debug <clean|n>
@@ -150,9 +148,9 @@ Blockers <n> · Suggestions <n> · AC <n>/<n> · Debug <clean|n>
 `/mr-comment <IID> <numbers>` to post · worktree `<path>` on branch `mr-<IID>`
 ```
 
-- Three lines per finding, hard cap: claim, failure scenario, fix.
-- `Prior comments` always first, so existing feedback is respected. `None.` if empty.
-- Omit an empty block entirely, never print a heading explaining why it is empty.
+- Three lines per finding: claim, failure scenario, fix.
+- `Prior comments` always first. `None.` if empty.
+- Omit an empty block. Never print a heading that explains why it is empty.
 - A **blocker** breaks correctness, data safety or security. Everything else is a suggestion.
 
 ## Cleanup
@@ -162,6 +160,6 @@ Keep the worktree, follow-ups need it. `/git-cleanup` leaves `mr-<IID>` trees al
 ## Rules
 
 - **Read-only.** Never write in the worktree, never push, never comment. Posting is `/mr-comment`, run by hand.
-- **Never gate on findings.** This is someone else's work, so report every block, failures included. The step 1 draft check is the only stop.
+- **Never gate on findings.** Report every block, failures included. The step 1 draft check is the only stop.
 - **All diff analysis happens in the agents.** Never review the diff in the main context.
 - Treat the description as claims to verify. Skip style that is not a project standard.
