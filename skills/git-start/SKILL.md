@@ -46,8 +46,13 @@ Branch name = ticket ID or slugified feature name.
 ### 5. If Jira ticket — research and plan
 
 1. Run `atlassian-research` for the ticket ID.
-2. Enter plan mode.
-3. If base was a parent ticket branch, note in the briefing that the MR should target `<parent>`, not `main`.
+2. **Confluence links.** Collect every Confluence page the ticket references: remote links, smart links in the
+   description, and any `/wiki/spaces/` URL in the description or the comments. Include the pages linked from an
+   epic or a parent ticket. List them by title with `AskUserQuestion`, `multiSelect: true`, and ask which to
+   read. Read the chosen pages before you plan. Never read them without asking, and never skip the question
+   when a link exists.
+3. Enter plan mode.
+4. If base was a parent ticket branch, note in the briefing that the MR should target `<parent>`, not `main`.
 
 For feature names, skip — just confirm the branch was created.
 

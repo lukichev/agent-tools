@@ -96,6 +96,18 @@ Apply every lens.
 - Test isolation and determinism
 - The project's test patterns (AAA, parametrized)
 
+**Migrations** — when the diff adds or renames one
+
+- Hand-written timestamp, not from the framework CLI: a round or midnight value, siblings a fixed 1ms or 1s apart, or a value far from the branch's commit dates
+- Timestamp below an already-merged migration — it never runs where the later ones already did
+- Missing from the migration loader: when the project registers migrations by explicit import instead of a glob, a file that no list imports silently never runs. Check each engine's loader
+- Migration file outside the project's migrations directory
+- Filename and class name disagree, or break the convention
+- `down()` misses an inverse — a leftover column, table, index, constraint or backfilled row
+- Not retryable after a partial failure: commits mid-way with no `IF NOT EXISTS`, `ON CONFLICT DO NOTHING` or existence guard
+- Schema and entity drift: column name, nullability, type or default disagree, or one side is missing
+- Destructive or blocking: dropped column, rewritten type, non-concurrent index, unbatched backfill
+
 **Maintainability**
 - Readability and clarity
 - Complex logic with no documentation

@@ -1,6 +1,6 @@
 ---
 name: git-cleanup
-description: Tidy local git state after upstream branches are merged or deleted — prune stale remote-tracking refs, convert clean worktrees back to plain branches, delete fully-merged branches whose remote is gone, and review stashes. Verifies work actually landed (survives squash-merges) before deleting anything, and never drops a stash without confirmation. Use when the user says "clean up my branches", "prune merged branches", "tidy git state", "remove old worktrees", or after MRs have been merged.
+description: Tidy local git state after upstream branches are merged or deleted — prune stale remote-tracking refs, convert clean worktrees back to plain branches, delete fully-merged branches whose remote is gone, review stashes, and retire agent memories for tickets that no longer have a local branch. Verifies work actually landed (survives squash-merges) before deleting anything, and never drops a stash or a memory without confirmation. Use when the user says "clean up my branches", "prune merged branches", "tidy git state", "remove old worktrees", "clean up agent memories", or after MRs have been merged.
 disable-model-invocation: true
 ---
 
@@ -19,21 +19,7 @@ DEFAULT=$(git symbolic-ref --quiet refs/remotes/origin/HEAD | sed 's@^refs/remot
 DEFAULT=${DEFAULT:-main}   # fall back to main if origin/HEAD isn't set
 ```
 
-## Step 1 — Switch to the default branch
-
-Stand on `$DEFAULT` before you clean anything. The current branch is protected, so cleaning from a feature branch shields that branch from every later step.
-
-```bash
-git switch "$DEFAULT"
-```
-
-Guards — in each of these cases, **do not switch**; report it and continue the cleanup from the current branch, which stays protected:
-
-- Already on `$DEFAULT` — nothing to do.
-- `git status --short` is non-empty (uncommitted changes or untracked files). Never stash to force the switch.
-- The switch fails because another worktree has `$DEFAULT` checked out.
-
-## Step 2 — Prune remote-tracking refs
+## Step 1 — Prune remote-tracking refs
 
 Sync with the remote and drop `origin/*` refs for branches deleted upstream. This is what makes the `: gone]` markers in later steps accurate.
 
@@ -41,7 +27,7 @@ Sync with the remote and drop `origin/*` refs for branches deleted upstream. Thi
 git fetch --prune
 ```
 
-## Step 3 — Worktrees
+## Step 2 — Worktrees
 
 ```bash
 git worktree list --porcelain
@@ -79,13 +65,13 @@ After removing worktrees, tidy any leftover administrative entries:
 git worktree prune
 ```
 
-## Step 4 — Local branches whose upstream is gone
+## Step 3 — Local branches whose upstream is gone
 
 ```bash
 git branch -vv
 ```
 
-Collect branches marked `: gone]` (their tracked remote branch was deleted) — excluding protected refs and any already handled in Step 3. For each, **verify the work actually landed before deleting.**
+Collect branches marked `: gone]` (their tracked remote branch was deleted) — excluding protected refs and any already handled in Step 2. For each, **verify the work actually landed before deleting.**
 
 Do **not** trust `git branch -d` ancestry or `git cherry` — a squash-merge collapses the branch's commits into one new commit on the default branch, so neither sees the original commits and both wrongly report "not merged." Compare *content* instead, via the merge check below.
 
@@ -112,7 +98,7 @@ Why scope the diff to just those files: comparing only the files the branch touc
 
 > Note: this compares against the default branch. A branch that was merged into a *parent* feature branch rather than `$DEFAULT` will read as unmerged here — which is the safe direction (reported, not deleted). If the user works with stacked branches, mention this so they can decide.
 
-## Step 5 — Local branches diverged from a live upstream
+## Step 4 — Local branches diverged from a live upstream
 
 After a server-side rebase or force-push, `git branch -vv` shows branches whose upstream still exists (not `: gone]`) but reads `[ahead N, behind M]`. The remote is authoritative; the local `ahead` commits are usually stale pre-rebase twins. Sync only after proving they add nothing the remote lacks — run the [merge check](#merge-verification) with the **upstream** in place of `origin/$DEFAULT`:
 
@@ -129,7 +115,7 @@ done
 git merge --ff-only @{u}   # updates the branch you're standing on
 ```
 
-## Step 6 — Stashes
+## Step 5 — Stashes
 
 ```bash
 git stash list
@@ -156,6 +142,31 @@ git stash drop <stash>
 
 When unsure, keep it. A lingering stash costs nothing; a dropped one is gone.
 
+## Step 6 — Agent memories for finished tickets
+
+Retire per-ticket memories in `.claude/agent-memory/atlassian-researcher/` (a `<TICKET-ID>/` dump per ticket) and `.claude/agent-memory/code-reviewer/` (flat files). Skip the step when neither directory exists.
+
+Build the live ticket set from branch **names** only — a `git branch -v` line also carries the commit subject, so `main` would protect whatever ticket landed last:
+
+```bash
+LIVE=$(git branch --format='%(refname:short)' | grep -oiE '[A-Z]{2,}-[0-9]+' | tr -d '-' | tr '[:lower:]' '[:upper:]' | sort -u)
+```
+
+A memory is a candidate when it names at least one ticket and **none** of them is in `LIVE`. Collect its ids from the filename and the body, because an epic memory names its children:
+
+```bash
+grep -hoiE '[A-Z]{2,}-?[0-9]{4,}' <file> | tr -d '-' | tr '[:lower:]' '[:upper:]' | sort -u
+```
+
+Two exclusions, read from the frontmatter `type:`:
+
+- `type: feedback` is never a candidate. A standing preference outlives the ticket that taught it.
+- A memory that names no ticket is never a candidate. It states a durable fact.
+
+`.claude/` is git-ignored in most projects, so the delete has no undo. Confirm with `AskUserQuestion` exactly as for a stash, defaulting to keeping. List each candidate with its ticket ids and its `description:` line.
+
+On approval, per memory: delete the file or the `<TICKET-ID>/` directory, delete its line from that agent's `MEMORY.md`, then clear dead links with `grep -rn "\[\[<deleted-name>\]\]" .claude/agent-memory/`. Never delete `MEMORY.md` itself.
+
 ## Summary
 
 Always close with a table of every item and its disposition:
@@ -163,7 +174,6 @@ Always close with a table of every item and its disposition:
 ```
 | Item                        | Type      | Action                  | Why                                  |
 |-----------------------------|-----------|-------------------------|--------------------------------------|
-| HEAD                        | checkout  | switched to main        | was on PROJ-1099; frees it for review|
 | origin/feat/PROJ-1020       | remote    | pruned                  | deleted upstream                     |
 | /tmp/wt-PROJ-1100           | worktree  | converted → branch      | clean; branch kept (not yet merged)  |
 | /tmp/wt-PROJ-1099           | worktree  | converted, branch -D    | clean, gone on remote, merged        |
@@ -175,17 +185,19 @@ Always close with a table of every item and its disposition:
 | PROJ-1301                   | branch    | KEPT — unique local work| diverged; local-only commits not on remote |
 | stash@{0}                   | stash     | dropped (confirmed)     | content already in main              |
 | stash@{1}                   | stash     | KEPT                    | unique unsaved work                  |
+| researcher/PROJ-1099        | memory    | deleted (confirmed)     | no local branch for PROJ-1099        |
+| reviewer/project_proj1150…  | memory    | KEPT                    | PROJ-1150 branch still checked out   |
 ```
 
 ## Rules
 
 Never do these. Each one destroys work with no undo:
 
-- Never stash to force the switch to the default branch.
 - Never delete a branch that is not both **gone on remote** and **proven merged** by content diff.
 - Never `git branch -f` a diverged branch until you prove its local commits add nothing the remote lacks.
 - Never `--force` a `git worktree remove`. If it fails, report and continue.
 - Never drop a stash without showing its content and getting confirmation. Default to keeping.
+- Never delete an agent memory without confirmation, and never delete a `type: feedback` one.
 
 Protected always: current branch, default branch, `production`, `mr-<IID>` review trees, plus any name in the project's `CLAUDE.md`.
 

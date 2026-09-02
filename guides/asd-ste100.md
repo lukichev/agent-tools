@@ -49,9 +49,29 @@ These rules are deliberately flat and literal. They do not suit copy where voice
 - Idioms, slang and figurative language. "Under the hood", "out of the box", "smoking gun", "red herring", "low-hanging fruit" and "sanity check" are examples, not the whole set. Any figure of speech counts.
   - Name the fact instead. "The smoking gun is the missing await" becomes "The missing `await` causes the failure". "That log line is a red herring" becomes "That log line is unrelated to the failure".
   - This applies hardest to debug and review prose, where a figure of speech hides the evidence that the reader needs.
+- Rhetorical framing around a point. State the point by itself.
+  - Significance preambles: "The key insight is", "What is interesting here is", "It is worth noting that".
+  - Contrast pivots: "It is not a cache problem, it is a lock problem". Write "The lock causes the failure".
+  - Aphoristic codas: a closing line that restates the point as a maxim.
+  - Quote-then-explain: do not quote a line and then paraphrase it. Point to `file.ts:12` and state the fact.
+  - A correct point lands without a frame.
 - Hedges and filler: "essentially", "basically", "just", "simply", "actually", "in a sense", "I think", "it seems", "kind of".
 - Preambles, compliments and closing questions: "Nice work!", "Happy to discuss!", "One small nit".
 - Strings of synonyms.
+
+## Volume
+
+The rules above control the shape of a sentence. These control how many sentences you write.
+
+- Answer first. Then stop.
+- Default to 4 lines or fewer. Expand only when the task needs it or the reader asks.
+- Do not recap work that the diff, the tool output or the file already shows.
+- Do not restate the request.
+- Do not list what you did not do, options you rejected, or next steps nobody asked for.
+- Point to `file.ts:12`. Do not describe the code in prose.
+- No headers or tables below 3 items. No closing offer.
+
+The "never lose content" rule still wins. A safety condition, a failed test, a skipped step or a stated assumption stays, even when it breaks the line budget.
 
 ## Structure
 
@@ -88,11 +108,31 @@ Good:
 
 Bad:
 
+> The key insight is that this isn't a validation problem — it's an ordering problem. The guard runs after the interceptor. Order is everything.
+
+Good:
+
+> The guard runs after the interceptor. Move the guard before the interceptor.
+
+Bad:
+
 > Refactoring of the retry handling was performed in order to address the situation where transient failures would have caused the job to be marked as failed prematurely.
 
 Good:
 
 > The retry handler now separates transient failures from permanent ones. A transient failure no longer fails the job.
+
+Every sentence below obeys the sentence rules. There are still too many of them.
+
+Bad:
+
+> I moved the permission check into the guard layer. I did not change the service. I considered a decorator, but a guard fits the existing pattern better. I added two unit tests. The tests cover the direct-role case. All unit tests pass. Tell me if you want the inherited-role case covered too.
+
+Good:
+
+> The permission check now runs in the guard layer. Two unit tests cover the direct-role case. All unit tests pass.
+>
+> The tests do not cover inherited roles.
 
 ## Source
 

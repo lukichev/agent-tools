@@ -87,7 +87,7 @@ Use the template from `mr-template.md` in this skill folder:
 | `{{TICKET_ID}}` | Ticket ID (e.g., PROJ-1234) — omit section if no ticket |
 | `{{SUMMARY}}` | One sentence: what was addressed |
 | `{{DETAILS}}` | 2-4 short bullets: what changed. No narrative, no restating the ticket. Omit if summary already covers it. |
-| `{{TESTING}}` | Short bullets of what the developer verified and its result. State facts ("build passed", "app launched", "endpoint returned 200"), not reasoning about why the change is safe. |
+| `{{TESTING}}` | 4-5 short bullets of what the developer verified and its result. State facts ("all tests pass", "build passed", "endpoint returned 200"), not reasoning about why the change is safe. Never quote counts — see [No quantities in Testing](#no-quantities-in-testing). |
 
 ### Description Style
 
@@ -99,7 +99,32 @@ Per-section limits:
 |---------|-------|
 | Summary | 1 sentence, max 25 words |
 | Details | 2-4 bullets, 1 sentence each, max 20 words |
-| Testing | 1 line per check, max 15 words, each states an outcome |
+| Testing | 4-5 bullets total, max 15 words each, each states an outcome |
+
+### No quantities in Testing
+
+Testing says **what** was verified, never **how much**. A count goes stale the moment
+anyone adds a test, and it reads as padding.
+
+Group related checks into one bullet instead of listing them. If the Testing section runs
+past 5 bullets, the bullets are too granular — merge them.
+
+Never write:
+
+- a test count or suite count ("21 unit tests pass", "19 suites, 267 tests")
+- a row, record or grant count ("1727 admin grants", "3 tables created")
+- a count of enum values, columns, endpoints, files or migrations
+
+Bad:
+
+> - 21 guest unit tests pass.
+> - Workspace regression passes: 19 suites, 267 tests.
+> - Schema holds 3 guest tables, 4 share activity types, 1727 admin grants.
+
+Good:
+
+> - All unit tests pass, server and portal build.
+> - The schema matches the entities, and the permission backfill reached the admin roles.
 
 Bad:
 
@@ -118,4 +143,5 @@ Good:
 - **Never use checkboxes** (`- [ ]`) in the Testing section — use plain bullet points instead
 - **Write the description in ASD-STE100.** See [Description Style](#description-style)
 - **Testing states outcomes, not reasoning.** Write what was verified and its result ("build succeeded", "endpoint returned 200"). Never explain why the change is safe — that belongs in Details.
+- **No quantities in Testing, and 4-5 bullets at most.** Write "all tests pass", never a count of tests, suites, rows, grants, tables or files. See [No quantities in Testing](#no-quantities-in-testing).
 - Omit any section with nothing meaningful to add.

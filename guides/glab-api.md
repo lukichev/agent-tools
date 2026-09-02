@@ -46,3 +46,14 @@ Key off `detailed_merge_status`, not `has_conflicts`:
 ## Inline comments need the Discussions API
 
 The `-f` form fields of `glab api` do not nest the `position` object. The comment posts as a general MR comment instead of an inline one. Use `curl` against the Discussions API, then confirm `notes[0].type` is `DiffNote`.
+
+## jq breaks on payloads with raw control characters
+
+A description that holds raw control characters makes `jq` fail with "Invalid string: control characters ... must be escaped" and return empty output. A poll loop then reads an empty `rebase_in_progress` and exits with a false "done".
+
+Parse with `python3` when a payload may hold such text:
+
+```bash
+glab api "projects/:fullpath/merge_requests/<iid>?include_rebase_in_progress=true" \
+  | python3 -c "import json,sys;d=json.load(sys.stdin,strict=False);print(d.get('rebase_in_progress'),d.get('merge_error'),d['sha'])"
+```

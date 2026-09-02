@@ -70,12 +70,14 @@ Most agents and skills read the target project's `CLAUDE.md` for context. For be
 | `/mr-review` | Load and review a GitLab MR with comments |
 | `/mr-comment` | Post numbered review suggestions as inline diff comments on a GitLab MR |
 | `/mr-status-check` | Dashboard of your open MRs — pipeline, comments, rebase needs, merge readiness |
+| `/mr-watch` | One unattended tick — rebase the safe MRs, report only the delta. Built for `/loop /mr-watch` |
 
 ### Atlassian
 
 | Skill | Purpose |
 |-------|---------|
 | `/jira-create` | Create Jira tickets with standard format |
+| `/jira-roast` | Critically re-verify a ticket: claims, AC, hygiene |
 | `/atlassian-research` | Research Jira tickets/topics via atlassian-researcher agent |
 | `/escalation-research` | Deep investigation of escalation/issue tickets |
 
@@ -115,4 +117,4 @@ The same file doubles as an output style, which applies the rules to a whole ses
 ## Requirements
 
 - **VCS**: GitLab (`glab` CLI)
-- **Atlassian MCP**: Required for `atlassian-researcher`, `escalation-researcher`, and `jira-create`. Other tools work without it.
+- **Atlassian MCP**: Required for `atlassian-researcher`, `escalation-researcher`, `jira-create` and `jira-roast`. Other tools work without it.

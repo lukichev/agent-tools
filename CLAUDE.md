@@ -5,7 +5,7 @@ Reusable toolkit of Claude Code agents, skills and guides. Symlinked into any pr
 ## Structure
 
 - `agents/` — 6 agents (code-reviewer, logic-reviewer, session-reflector, atlassian-researcher, escalation-researcher, claude-optimiser)
-- `skills/` — 18 skills, `git-` prefix for git, `mr-` prefix for merge requests
+- `skills/` — 20 skills, `git-` prefix for git, `mr-` prefix for merge requests
 - `guides/` — code style guides (Angular 21, NestJS, Python 3.10+, Flutter/Dart), the ASD-STE100 writing guide, and the `glab` API guide. Read on demand via a pointer line, never `@import` — an import loads the full guide every session
 - `output-styles/asd-ste100.md` — a relative symlink to `guides/asd-ste100.md`, so the output style and the reference cannot drift
 
