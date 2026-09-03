@@ -1,12 +1,12 @@
 ---
 name: mr-status-check
-description: Check status of all open MRs authored by the current user. Shows pipeline status, unresolved comments, rebase needs, and merge readiness. Use when the user says "check my MRs", "MR status", "any comments on my MRs?", "do I need to rebase?", or "what needs attention?".
+description: Check status of all open MRs authored by the current user. Shows pipeline status, unresolved comments, rebase needs, merge readiness, and Jira questions addressed to the user that have no reply. Use when the user says "check my MRs", "MR status", "any comments on my MRs?", "do I need to rebase?", "any questions for me?", "anything waiting on me?", or "what needs attention?".
 context: fork
 ---
 
 # MR Status Check
 
-Dashboard of your open MRs: comments, pipeline, rebase status, merge readiness. Read-only. Never modify an MR, push or rebase.
+Dashboard of your open MRs: comments, pipeline, rebase status, merge readiness, and Jira questions that wait for your reply. Read-only. Never modify an MR, push, rebase, or post to Jira.
 
 Read `~/.claude/guides/glab-api.md` before you call `glab`.
 
@@ -55,14 +55,36 @@ git rev-list --count origin/<source_branch>..origin/<target_branch>
 ```
 Display as `N behind`, or `up to date` when 0.
 
-### 3. Summary table
+### 3. Fetch Jira questions per MR
+
+Find the questions that wait for your reply. A question you asked that has no answer from others is not in scope.
+
+**Ticket key.** Take the first match of `^[A-Z]+-\d+` in `source_branch`. If there is none, take the trailing `, PROJ-1234` from the title. No key: show `n/a` in the Jira column and skip this step for that MR.
+
+**Tools.** The Jira tools are deferred. Load them once:
+```
+ToolSearch: select:mcp__atlassian__atlassianUserInfo,mcp__atlassian__getJiraIssue
+```
+Call `atlassianUserInfo` once and keep your `account_id` and display name.
+
+**Fetch.** Issue one `getJiraIssue` call per ticket in one message, with `fields: ["summary", "status", "comment", "subtasks"]` and `responseContentFormat: "markdown"`. Then fetch every sub-task the same way, all in one message. QA posts feedback on the sub-tasks.
+
+**Pending question rule.** On each issue (story or sub-task), sort the comments by `created`. Find the time of your last comment. A comment is a pending question when all of these hold:
+
+1. Its author is not you.
+2. It was created after your last comment on that issue, or you have no comment on that issue.
+3. It mentions you (`@<your display name>`) or contains `?`.
+
+Count the pending questions per MR across the story and its sub-tasks. Keep for each: issue key, author display name, created date, first line of the body truncated to 100 chars.
+
+### 4. Summary table
 
 ```
-| MR    | Title                          | Pipeline | Comments     | Rebase | Behind   | Status          |
-|-------|--------------------------------|----------|--------------|--------|----------|-----------------|
-| !123  | feat(auth): add SSO, PROJ-1234  | passed   | 2 unresolved | needed | 34       | needs attention |
-| !124  | fix(billing): prorate, PROJ-5678| running  | none         | ok     | 12       | waiting         |
-| !125  | refactor(deps): luxon, PROJ-9175| manual   | none         | ok     | 0        | ready           |
+| MR    | Title                          | Pipeline | Comments     | Jira       | Rebase | Behind   | Status          |
+|-------|--------------------------------|----------|--------------|------------|--------|----------|-----------------|
+| !123  | feat(auth): add SSO, PROJ-1234  | passed   | 2 unresolved | 1 question | needed | 34       | needs attention |
+| !124  | fix(billing): prorate, PROJ-5678| running  | none         | none       | ok     | 12       | waiting         |
+| !125  | refactor(deps): luxon, PROJ-9175| manual   | none         | n/a        | ok     | 0        | ready           |
 ```
 
 Truncate titles to 40 chars. Sort: needs attention, then waiting, then ready.
@@ -71,13 +93,13 @@ Truncate titles to 40 chars. Sort: needs attention, then waiting, then ready.
 
 1. `draft`: MR is marked as draft
 2. `blocked`: pipeline failed
-3. `needs attention`: unresolved comments, or conflicts, or behind > 0
+3. `needs attention`: unresolved comments, or pending Jira questions, or conflicts, or behind > 0
 4. `waiting`: pipeline running or pending
-5. `ready`: pipeline passed or manual, no unresolved comments, no rebase needed, behind == 0
+5. `ready`: pipeline passed or manual, no unresolved comments, no pending Jira questions, no rebase needed, behind == 0
 
 A branch behind its target is not mergeable until it is rebased.
 
-### 4. Unresolved comment detail
+### 5. Unresolved comment detail
 
 For each MR with unresolved comments, first line of each comment, truncated to 100 chars:
 
@@ -87,11 +109,22 @@ For each MR with unresolved comments, first line of each comment, truncated to 1
   - @reviewer (line 88 of src/auth.ts): "Missing null check"
 ```
 
+### 6. Pending question detail
+
+For each MR with pending Jira questions, one line per question:
+
+```
+!123 - PROJ-1234 - 1 pending question:
+  - Reviewer Name on PROJ-1240 (2026-09-01): "Will new trial accounts also get this?"
+```
+
+Name the issue the comment sits on, so a sub-task question is not mistaken for a story question.
+
 ## Output Format
 
 This skill runs forked. Only the final message reaches the caller, so it must hold both:
 
-1. The summary table and the unresolved comment detail.
+1. The summary table, the unresolved comment detail, and the pending question detail.
 2. A fenced JSON block with one record per MR, for callers such as `/git-rebase-all`:
 
 ```json
@@ -101,8 +134,10 @@ This skill runs forked. Only the final message reaches the caller, so it must ho
     "title": "feat(auth): add SSO, PROJ-1234",
     "source_branch": "PROJ-1234",
     "target_branch": "main",
+    "ticket": "PROJ-1234",
     "pipeline": "success",
     "unresolved_comments": 2,
+    "pending_questions": 1,
     "has_conflicts": false,
     "detailed_merge_status": "need_rebase",
     "behind": 34,
@@ -111,5 +146,7 @@ This skill runs forked. Only the final message reaches the caller, so it must ho
   }
 ]
 ```
+
+`ticket` is `null` and `pending_questions` is `0` when no key was found.
 
 Include every open MR in the JSON, `ready` ones too. `/git-rebase-all` needs the full list to resolve stacked-MR parents.
