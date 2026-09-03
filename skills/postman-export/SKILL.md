@@ -67,7 +67,7 @@ Postman Collection v2.1 schema. These apply when no project-level conventions fi
 ```json
 {
   "info": {
-    "name": "<TICKET-ID> — <Short Description>",
+    "name": "<TICKET-ID> - <Short Description>",
     "description": "Markdown description of what this collection covers",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -83,13 +83,13 @@ Postman Collection v2.1 schema. These apply when no project-level conventions fi
 
 Standard v2.1 knowledge is assumed. These are the rules that are easy to get wrong.
 
-- **Auth inheritance**: set auth at collection level. Do NOT set `auth` on individual requests unless overriding. Use `"auth": { "type": "noauth" }` for unauthenticated endpoints.
-- **`raw` URL**: optional query params are NOT appended in the request template, only in `originalRequest` inside response examples (with values filled in).
+- **Auth inheritance**: set auth at collection level. Do not set `auth` on individual requests unless overriding. Use `"auth": { "type": "noauth" }` for unauthenticated endpoints.
+- **`raw` URL**: optional query params are not appended in the request template, only in `originalRequest` inside response examples (with values filled in).
 - **Path variables**: keep the `:` prefix in the path array (`":accountId"`). Include `description` on every path variable.
 - **Query params**: all params, required and optional, go in the `query` array. Set `"disabled": true` for optional ones.
 - **Description format** for path vars and query params: `"Type | Required/Optional | Constraint"`. Include enum values where applicable (`"ASC | DESC"`).
 - **JSON body**: include `options.raw.language: "json"`. JSON comments (`// description`) are allowed in `raw` for inline field docs.
-- **Formdata file fields**: use `"type": "file"` with `"src": ""`. Do NOT use `postman-cloud://` URLs.
+- **Formdata file fields**: use `"type": "file"` with `"src": ""`. Do not use `postman-cloud://` URLs.
 - **GET with empty body**: add `"protocolProfileBehavior": { "disableBodyPruning": true }` at the request-item level.
 - **Response examples**: at least one success response per endpoint. `originalRequest` is a full copy of the request with all values filled in. Include error responses (400, 404) for notable error cases.
 - **One request per endpoint**: list all query params on a single request item.

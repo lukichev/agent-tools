@@ -20,17 +20,17 @@ Read the project root `CLAUDE.md`, `~/.claude/CLAUDE.md`, any nested or parent `
 Check for:
 - Tiered context. Tier 1 (always loaded, first 200 lines): project name, critical rules, quick-start commands, troubleshooting table. Target under 800 tokens. Tier 2 (on demand): component docs, API references, deployment guides, linked by a pointer line that names the path and says when to read it. Target 500-1,500 tokens per doc. Tier 3 (never loaded): full API specs, changelogs, generated docs. Referenced by path only.
 - Size: the first 200 lines hold all critical info. Over 200 lines, extract detail to linked docs. Estimate tokens with the command in Measurement Targets.
-- Litmus test per line: "Would Claude make a mistake without this?" No: cut.
+- Test per line: "Would Claude make a mistake without this?" No: cut.
 - Redundancy with MEMORY.md or agent memory files.
 - Information already in code docstrings.
 - Verbose prose. Compress to tables or bullets. A 500-word architecture section becomes 15 words plus a link to `docs/ARCHITECTURE.md`.
 - Filler: "Please note that", "It's important to", "Make sure to".
 - Stale content: deleted files, old decisions, deprecated features.
 - Missing critical info: build commands, test commands, key constraints.
-- Front-loading: critical rules and quick-start first, not after architecture docs.
+- Order: critical rules and quick-start first, not after architecture docs.
 - `@import` usage. `@path/to/file` loads the full file into every session. Prefer a pointer line that names the path and says when to read it.
 - Content that belongs in skills. Domain knowledge or workflows needed only sometimes go in `.claude/skills/`. CLAUDE.md loads every session, skills load on demand.
-- Rules that should be hooks. "Always run X after Y" is a hook. Hooks are deterministic, CLAUDE.md is advisory.
+- Rules that belong in hooks. "Always run X after Y" is a hook. Hooks are deterministic, CLAUDE.md is advisory.
 - Compaction instructions for projects with long sessions, such as "When compacting, preserve the full list of modified files."
 - Quick reference card: recommend `docs/QUICK_REF.md` with the top 10 commands, top 5 troubleshooting fixes and critical rules, read on demand.
 - Docs navigation hub: for larger projects, recommend `docs/INDEX.md` that maps tasks to docs ("I want to work on the API -> docs/API.md").
@@ -54,7 +54,7 @@ Read all `.claude/agents/*.md`.
 - Says when to invoke, not only what the agent does.
 - Trigger examples use realistic user phrases.
 - No overlap with other agents' descriptions.
-- Short enough not to bloat the orchestrator's context.
+- Short, so it does not fill the orchestrator's context.
 
 #### 3b. Model selection
 
@@ -62,7 +62,7 @@ Read all `.claude/agents/*.md`.
 |---|---|
 | `opus` | Agents whose mistakes are costly: review, correctness analysis, multi-step research. |
 | `sonnet` | Routine or high-volume agents where an eval shows quality holds. |
-| `haiku` | Fan-out search and aggregation subtasks with a small blast radius. |
+| `haiku` | Fan-out search and aggregation subtasks where a mistake has limited impact. |
 
 Before you recommend a cheaper model, recommend the current model at lower effort. On current models, low effort often matches a prior generation's high effort at lower cost, and one model keeps one prompt cache. Recommend a change only for a clear mismatch, and name the check that would confirm it.
 
@@ -76,7 +76,7 @@ Before you recommend a cheaper model, recommend the current model at lower effor
 - Defines the delta from default Claude behavior, not general knowledge.
 - No meta-instructions: "Think step by step", "Be careful", "Be thorough".
 - No repetition of built-in capabilities.
-- A focused 20-line prompt beats a vague 100-line prompt.
+- A focused 20-line prompt works better than a vague 100-line prompt.
 - Tables and lists for reference data. Prose for behavior, with the reason beside each rule. Numbered steps only where the order is fragile (destructive commands, auth flows).
 
 #### 3e. Agent memory
@@ -90,7 +90,7 @@ Read `.claude/skills/`.
 
 Check for:
 - Skills for domain knowledge that is only sometimes relevant.
-- CLAUDE.md content that should be a skill.
+- CLAUDE.md content that belongs in a skill.
 - Frontmatter with `name` and `description`. `disable-model-invocation: true` on side-effect workflows that must be triggered by hand.
 - Workflow skills that could replace multi-step prompts the user types often.
 - Missing skills: the user repeats the same complex instructions.
@@ -100,7 +100,7 @@ Check for:
 Read the `hooks` key in `.claude/settings.json` and `.claude/settings.local.json`.
 
 Check for:
-- CLAUDE.md rules that should be hooks. A hook always runs, a CLAUDE.md line may be ignored under context pressure. "Must happen every time with zero exceptions" is a hook.
+- CLAUDE.md rules that belong in hooks. A hook always runs, a CLAUDE.md line may be ignored under context pressure. "Must happen every time with zero exceptions" is a hook.
 - Common hook opportunities:
   - Session-start hook: show project status (DB running, current branch, environment) and hint at relevant docs from recent changes
   - Linter or formatter after file edits
@@ -129,7 +129,7 @@ Check for:
 
 ### 8. Cross-layer redundancy
 
-Each fact lives in one place:
+Each fact has one location:
 
 | Info Type | Canonical Location |
 |---|---|

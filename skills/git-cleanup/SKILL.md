@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # git-cleanup
 
-Reclaim local git state after merges. Verify before you remove. Never destroy a stash or an unmerged branch without explicit sign-off. Finish with a summary of what was pruned, converted, deleted and left alone, and why.
+Reclaim local git state after merges. Verify before you remove. Never destroy a stash or an unmerged branch without explicit confirmation. Finish with a summary of what was pruned, converted, deleted and left alone, and why.
 
 Protected refs, never touched: the current branch, the default branch (`main`/`master`), `production`, and `mr-<IID>` review worktrees with their branches and `refs/mr-review/<IID>` refs. Read the project's `CLAUDE.md` for more protected branch names before you start.
 
@@ -33,7 +33,7 @@ git fetch --prune
 git worktree list --porcelain
 ```
 
-Never remove the first entry (the primary checkout) or the worktree you stand in (`git rev-parse --show-toplevel`).
+Never remove the first entry (the primary checkout) or the worktree that holds the current directory (`git rev-parse --show-toplevel`).
 
 **Review worktrees**, `mr-<IID>` directories from `/mr-review` on a branch of the same name, are protected with that branch and its `refs/mr-review/<IID>` ref. Leave all three and report each as skipped. The branch also reads as `: gone]` and unmerged, so the branch logic below must not touch it.
 
@@ -92,15 +92,15 @@ else
 fi
 ```
 
-An empty final diff means merged (squash, rebase or plain merge all collapse to this). A non-empty diff means not merged. Scoping the diff to the touched files keeps a busy `main` from hiding a clean merge, and a later `main` edit only keeps the branch.
+An empty final diff means merged (squash, rebase or plain merge all collapse to this). A non-empty diff means not merged. The diff is scoped to the touched files, so unrelated changes on `main` do not hide a clean merge. A later `main` edit to a touched file makes the check keep the branch, which is the safe result.
 
 > A branch merged into a parent feature branch, not `$DEFAULT`, reads as unmerged here. Tell the user if they work with stacked branches.
 
 ## Step 4 - Local branches diverged from a live upstream
 
-After a server-side rebase or force-push, `git branch -vv` shows a live upstream with `[ahead N, behind M]`. The remote is authoritative. The local `ahead` commits are usually pre-rebase twins. Run the [merge check](#merge-verification) with the upstream in place of `origin/$DEFAULT`:
+After a server-side rebase or force-push, `git branch -vv` shows a live upstream with `[ahead N, behind M]`. The remote is authoritative. The local `ahead` commits are usually pre-rebase copies of the remote commits. Run the [merge check](#merge-verification) with the upstream in place of `origin/$DEFAULT`:
 
-- **Empty diff**: rebased twins, safe to reset the pointer to the upstream.
+- **Empty diff**: pre-rebase copies, safe to reset the pointer to the upstream.
 - **Non-empty diff**: unique local commits. Keep and report. Never `git branch -f`, it discards them silently.
 
 Once all are verified, sync in one pass (skips the current branch, then fast-forwards it):
@@ -132,7 +132,7 @@ Check whether those distinctive added lines exist in the default branch's versio
 git show origin/$DEFAULT:<file> | grep -F "<distinctive added line>"
 ```
 
-Present each stash with its summary line, file stat, a couple of distinctive added lines, and your assessment (**likely already merged** or **unique unsaved work**). Use `AskUserQuestion` to confirm which to drop, defaulting to keep. Only on explicit approval:
+Present each stash with its summary line, file stat, two or three distinctive added lines, and your assessment (**likely already merged** or **unique unsaved work**). Use `AskUserQuestion` to confirm which to drop, defaulting to keep. Only on explicit approval:
 
 ```bash
 git stash drop <stash>
@@ -144,7 +144,7 @@ When unsure, keep it.
 
 Retire per-ticket memories in `.claude/agent-memory/atlassian-researcher/` (a `<TICKET-ID>/` directory per ticket) and `.claude/agent-memory/code-reviewer/` (flat files). Skip the step when neither directory exists.
 
-Build the live ticket set from branch names only. A `git branch -v` line also carries the commit subject, so `main` would protect the last ticket that landed:
+Build the live ticket set from branch names only. A `git branch -v` line also carries the commit subject, so `main` would protect the last ticket that merged:
 
 ```bash
 LIVE=$(git branch --format='%(refname:short)' | grep -oiE '[A-Z]{2,}-[0-9]+' | tr -d '-' | tr '[:lower:]' '[:upper:]' | sort -u)
@@ -173,14 +173,14 @@ Close with a table of every item and its disposition:
 | Item                        | Type      | Action                  | Why                                  |
 |-----------------------------|-----------|-------------------------|--------------------------------------|
 | origin/feat/PROJ-1020       | remote    | pruned                  | deleted upstream                     |
-| /tmp/wt-PROJ-1100           | worktree  | converted → branch      | clean; branch kept (not yet merged)  |
+| /tmp/wt-PROJ-1100           | worktree  | converted → branch      | clean, branch kept (not yet merged)  |
 | /tmp/wt-PROJ-1099           | worktree  | converted, branch -D    | clean, gone on remote, merged        |
 | /tmp/wt-PROJ-1200           | worktree  | left alone              | uncommitted changes                  |
 | /tmp/mr-7008                | worktree  | left alone (88M)        | MR review tree, protected            |
 | PROJ-1099                   | branch    | deleted (branch -D)     | gone + content matches main          |
 | PROJ-1150                   | branch    | KEPT - unmerged         | gone on remote but diff non-empty    |
-| PROJ-1300                   | branch    | synced (branch -f)      | diverged; local commits are rebased twins on remote |
-| PROJ-1301                   | branch    | KEPT - unique local work| diverged; local-only commits not on remote |
+| PROJ-1300                   | branch    | synced (branch -f)      | diverged, local commits are pre-rebase copies of remote |
+| PROJ-1301                   | branch    | KEPT - unique local work| diverged, local-only commits not on remote |
 | stash@{0}                   | stash     | dropped (confirmed)     | content already in main              |
 | stash@{1}                   | stash     | KEPT                    | unique unsaved work                  |
 | researcher/PROJ-1099        | memory    | deleted (confirmed)     | no local branch for PROJ-1099        |

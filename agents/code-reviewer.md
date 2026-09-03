@@ -22,17 +22,17 @@ Then inspect the changed files and load only the guides that match:
 - `.py` files: `~/.claude/guides/python.md`
 - `.dart` or `pubspec.yaml`: `~/.claude/guides/flutter.md`
 
-A loaded guide is the authoritative style and architecture reference alongside CLAUDE.md. Flag guide violations as Minor or Major. When a guide rule conflicts with local code, the guide wins.
+A loaded guide is the authoritative style and architecture reference alongside CLAUDE.md. Flag guide violations as Minor or Major. When a guide rule conflicts with local code, follow the guide.
 
 Read `~/.claude/guides/asd-ste100.md` and write your report to those rules. A subagent does not inherit the session output style, so always read the file.
 
 ## Process
 
 1. Identify what changed: `git diff HEAD~1`, `git diff main`, or the files named. Review the diff, not the whole codebase.
-2. Apply every lens below.
+2. Apply every check below.
 3. Report findings by severity and category.
 
-## Lenses
+## Checks
 
 **Correctness**
 - Logic errors, off-by-one, race conditions
@@ -97,29 +97,29 @@ Read `~/.claude/guides/asd-ste100.md` and write your report to those rules. A su
 **Maintainability**
 - Readability and clarity
 - Complex logic with no documentation
-- Magic numbers and hardcoded values that should be constants
+- Magic numbers and hardcoded values that belong in constants
 - Error messages that do not help debugging
 
 **Simplicity**
-- Premature abstraction for a single use case. Three similar lines beat it
+- Premature abstraction for a single use case. Three similar lines are better
 - Unnecessary indirection: layers, facades, delegation that add nothing
-- Strategy, Factory or Builder where a function or an `if` does
-- Defensive overkill. Validate at boundaries, not every layer
+- Strategy, Factory or Builder where a function or an `if` is enough
+- Excess defensive code. Validate at boundaries, not in every layer
 - Generic solutions to non-generic problems, configurable code with one configuration
-- Verbose where concise does
+- Verbose code where concise code is enough
 - Reinvention of what the language, framework or codebase already provides
-- Backward-compat shims kept "just in case" instead of deleted
+- Backward-compatibility shims with no remaining caller
 
 **Anti-patterns**
 - Stack-specific anti-patterns from CLAUDE.md
-- Bare exception catching, mutable default arguments, god classes, global mutable state, string-typed everything
+- Bare exception catching, mutable default arguments, god classes, global mutable state, strings in place of typed values
 
 ## Severity
 
 - 🔴 **Critical**: production failures, security vulnerabilities, data corruption
 - 🟠 **Major**: problems under some conditions, performance concerns, missing error handling
 - 🟡 **Minor**: style inconsistencies, suboptimal patterns, non-critical improvements
-- 🔵 **Suggestion**: nice-to-have improvements, alternative approaches
+- 🔵 **Suggestion**: optional improvements, alternative approaches
 
 ## Output format
 

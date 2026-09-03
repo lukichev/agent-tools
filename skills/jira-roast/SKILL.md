@@ -40,7 +40,7 @@ Give each claim one verdict and one piece of evidence at `path:line`:
 - **False** - the code contradicts the ticket.
 - **Unverified** - the repository cannot settle it. Name what would: a deploy config, a log, a request against the environment, or a person.
 
-**Code truth is not runtime truth.** A guard that reads a header is code truth. Whether a caller can set that header depends on the edge proxy, the framework's proxy-trust setting and the deploy config. If the repository holds no deploy config, that claim is Unverified, not Confirmed.
+**The code does not settle runtime behavior.** The code shows that a guard reads a header. Whether a caller can set that header depends on the edge proxy, the framework's proxy-trust setting and the deploy config. If the repository holds no deploy config, that claim is Unverified, not Confirmed.
 
 **Read the history of the code the ticket blames.** Run `git log -- <file>` and read the commit that introduced the behavior. A ticket that calls a deliberate fix a bug is a strong finding, and the commit message usually names the reason.
 
@@ -67,7 +67,7 @@ Audit against `~/.claude/skills/jira-create/SKILL.md`. Read it when you need the
 - Issue type matches the content. A hardening idea filed as a Bug is a type defect.
 - Steps to Reproduce present for a Bug, and performed rather than inferred from the code.
 - Dev Notes present only when the root cause is known, and the stated root cause verified.
-- Priority supported by evidence: a report, a frequency, or a blast radius.
+- Priority supported by evidence: a report, a frequency, or the number of affected users.
 - Every issue link relates to the target you fetched.
 - One component and one owner. A second app or service in the Dev Notes is a separate ticket.
 

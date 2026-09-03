@@ -70,7 +70,7 @@ Mention an error tracking ID (a Sentry issue, for example) in Dev Notes when one
 
 ## Ticket Style
 
-Read `~/.claude/guides/asd-ste100.md` and write the title, Summary, AC, Steps to Reproduce, Dev Notes and QA to those rules. The reader is a developer who picks the ticket up cold, weeks later.
+Read `~/.claude/guides/asd-ste100.md` and write the title, Summary, AC, Steps to Reproduce, Dev Notes and QA to those rules. The reader is a developer who reads the ticket weeks later, with no context.
 
 | Section | Shape |
 |---------|-------|

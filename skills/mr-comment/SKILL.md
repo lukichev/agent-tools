@@ -39,7 +39,7 @@ See [Comment Style](#comment-style).
 
 ### 5. Post each comment
 
-Use `curl` against the Discussions API. Never `glab api -f`: its form fields do not nest the `position` object, so the comment lands as a general MR comment.
+Use `curl` against the Discussions API. Never `glab api -f`: its form fields do not nest the `position` object, so the comment posts as a general MR comment.
 
 ```bash
 curl -s --request POST \

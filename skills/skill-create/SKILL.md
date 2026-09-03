@@ -15,7 +15,7 @@ disable-model-invocation: true
 4. Improve from the results, repeat
 5. Optimize the description for triggering
 
-The user may already have a draft or may skip testing. Start where they are.
+The user may already have a draft or may skip testing. Start from what the user has.
 
 ## Capture Intent
 
@@ -40,7 +40,7 @@ skill-name/
 ```yaml
 ---
 name: skill-name
-description: What it does and when to trigger. Be specific and slightly "pushy".
+description: What it does and when to trigger. Be specific and name the trigger contexts.
 argument-hint: "<what the user passes>"
 disable-model-invocation: false  # set true to prevent Claude from auto-triggering
 user-invocable: false            # only Claude can invoke (for background knowledge)

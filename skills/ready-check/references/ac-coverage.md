@@ -22,7 +22,7 @@ Shared by `/ready-check` and `/mr-review`. Judges a changeset against a ticket's
 | Rating | Meaning |
 | --- | --- |
 | `✅ Done` | Implemented, and you can point at the file and line |
-| `⚠️ Partial` | Some parts land, something identifiable is absent |
+| `⚠️ Partial` | Some parts are implemented, something identifiable is absent |
 | `❌ Missing` | No evidence in the changeset |
 
 ## Output format

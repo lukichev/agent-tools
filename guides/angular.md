@@ -74,7 +74,7 @@ readonly selected = linkedSignal<Item | undefined>({
 Prefer the **Resource API** (experimental, but the recommended direction) over `subscribe()` blocks for signal-backed async state. A resource reacts to its params and exposes `value`, `status`, `error`, `isLoading` and `reload()`.
 
 ```typescript
-// Plain HTTP GET backed by HttpClient — use httpResource for this common case.
+// Plain HTTP GET backed by HttpClient - use httpResource for this common case.
 readonly user = httpResource<User>(() => `/api/users/${this.userId()}`);
 
 // Arbitrary async source.
@@ -175,9 +175,9 @@ export const MY_ROUTES: Routes = [
 |------|---------|
 | Use CSS variables | `color: var(--text-color)` |
 | Use rem/em units | `padding: 1rem` |
-| Do NOT use `::ng-deep` | Deprecated. Use component styles, CSS variables, or global utility classes |
-| Do NOT use `ViewEncapsulation.None` | Keep default encapsulation |
-| Do NOT use BEM naming | Use flat, descriptive class names |
+| Do not use `::ng-deep` | Deprecated. Use component styles, CSS variables, or global utility classes |
+| Do not use `ViewEncapsulation.None` | Keep default encapsulation |
+| Do not use BEM naming | Use flat, descriptive class names |
 
 ```scss
 .my-component {

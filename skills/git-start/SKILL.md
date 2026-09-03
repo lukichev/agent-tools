@@ -1,6 +1,6 @@
 ---
 name: git-start
-description: Start work on a new feature or ticket by creating a branch. Takes a Jira ticket (e.g. PROJ-1020) or a feature name. Defaults to branching from main. Supports stacking via "onto <parent>"; if no "onto" is given but the current branch looks like a ticket, asks before defaulting to main. If a Jira ticket is provided, researches it and enters plan mode. Use when the user says "start on PROJ-1020", "create a branch for...", "begin feature Y".
+description: Start work on a new feature or ticket by creating a branch. Takes a Jira ticket (e.g. PROJ-1020) or a feature name. Defaults to branching from main. Supports stacking via "onto <parent>". If no "onto" is given but the current branch looks like a ticket, asks before defaulting to main. If a Jira ticket is provided, researches it and enters plan mode. Use when the user says "start on PROJ-1020", "create a branch for...", "begin feature Y".
 argument-hint: "<TICKET-123 or feature-name> [onto <PARENT-TICKET>]"
 disable-model-invocation: true
 ---

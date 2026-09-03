@@ -8,7 +8,7 @@ Shared by `git-rebase`, `git-rebase-all`, `mr-review`, `mr-status-check` and `mr
 | --- | --- |
 | `--jq` is unsupported and returns empty | Pipe raw JSON to `jq` or `python3` |
 | `glab mr diff <IID>` has no `--name-only` | Take the file list from the diffs API |
-| Default page size is 20, so a busy MR truncates in silence | Add `per_page=100` to every list endpoint |
+| Default page size is 20, so a busy MR truncates without an error | Add `per_page=100` to every list endpoint |
 
 ## Fields that need a query parameter
 
@@ -33,7 +33,7 @@ while :; do
 done
 ```
 
-Key off `detailed_merge_status`, not `has_conflicts`:
+Decide from `detailed_merge_status`, not `has_conflicts`:
 
 | Value | Meaning |
 | --- | --- |

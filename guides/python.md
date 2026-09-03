@@ -5,7 +5,7 @@ Python 3.10+.
 ## Type Hints
 
 - **100% coverage** on function signatures, return types and instance variables
-- `X | None` not `Optional[X]`; `list[X]` not `List[X]`; `dict[K, V]` not `Dict[K, V]`
+- `X | None` not `Optional[X]`, `list[X]` not `List[X]`, `dict[K, V]` not `Dict[K, V]`
 - No `from typing import Optional, List, Dict, Tuple, Set`. Use the builtins
 - Import from `typing` only: `Callable`, `TypeVar`, `Protocol`, `TypeAlias`, `Any` (last resort)
 - Annotate `self._foo: type` in `__init__` for non-obvious instance variables
@@ -72,7 +72,7 @@ def check_order(order) -> None:
 - **Never** swallow `CancelledError`. Re-raise after cleanup
 
 ```python
-# BAD — task can be garbage collected, errors silently lost
+# BAD - task can be garbage collected, errors silently lost
 asyncio.create_task(self._dispatch(event))
 
 # GOOD
@@ -131,7 +131,7 @@ task.add_done_callback(self._background_tasks.discard)
 
 - **DRY, not premature**: extract a helper after the third repetition
 - **Module-level constants**: `MAX_RETRIES = 5`, no inline magic numbers
-- **Guard clauses**: early return for edge cases, then the happy path
+- **Guard clauses**: early return for edge cases, then the main path
 - **Context managers** (`with`/`async with`) for anything that needs cleanup
 - **Comprehensions** for simple collections: `[x.id for x in items]`
 - **`pathlib.Path`** over `os.path`

@@ -27,7 +27,7 @@
 ## Code Quality
 * **Structure:** keep UI logic separate from business logic.
 * **Naming:** no abbreviations. Use descriptive, consistent names.
-* **Conciseness:** as short as stays clear.
+* **Conciseness:** as short as clarity allows.
 * **Simplicity:** no clever or obscure code.
 * **Error handling:** handle errors. Never fail silently.
 * **Styling:** max 80 characters per line. `PascalCase` for classes, `camelCase` for members, variables, functions and enums, `snake_case` for files.
@@ -223,7 +223,7 @@ linter:
 * **Assertions:** `package:checks` over the default `matchers`.
 * **Convention:** Arrange-Act-Assert.
 * **Mocks:** prefer fakes or stubs. When a mock is required, use `mockito` or `mocktail` without code generation.
-* **Coverage:** aim high.
+* **Coverage:** keep coverage high.
 
 ## Visual Design & Theming
 * **UI:** follow modern design guidelines.
@@ -463,7 +463,7 @@ final ButtonStyle myButtonStyle = ButtonStyle(
 
 ### Complementary Colors
 
-* Accent colors only. Jarring when overused, and hard on the eyes as text on background.
+* Accent colors only. Jarring when overused, and hard to read as text on a background.
 
 ### Example Palette
 

@@ -188,7 +188,7 @@ Read `~/.claude/guides/asd-ste100.md` and write your report to those rules. A su
 | KEY-125 | ... | ... | relates to | ... |
 
 ## Key Decisions & Discussion Points
-[Synthesized from comments across all tickets. Often the most valuable section.]
+[Synthesized from comments across all tickets]
 - **Decision 1**: [what was decided, by whom, in which ticket's comments]
 - **Decision 2**: ...
 - **Open Questions**: [unresolved items found in comments]
@@ -213,7 +213,7 @@ Read `~/.claude/guides/asd-ste100.md` and write your report to those rules. A su
 
 - Cite the ticket or page each fact came from.
 - Connect information across sources. Report patterns, contradictions and gaps.
-- A comment often contradicts or extends the description. Call that out.
+- A comment often contradicts or extends the description. Report it.
 - Quote API endpoints, config values and code references exactly.
 
 ## Edge cases
@@ -221,7 +221,7 @@ Read `~/.claude/guides/asd-ste100.md` and write your report to those rules. A su
 - Ticket not found: say so, suggest a check of the project key, and offer a topic search.
 - No linked tickets: say so. The ticket may be isolated or poorly linked.
 - No Confluence docs: say so. It may be a documentation gap.
-- Epic with 20+ tickets: summarize the children in groups by status or theme. Go deep only on the most relevant.
+- Epic with 20+ tickets: summarize the children in groups by status or theme. Read in detail only the most relevant.
 - Circular links: track visited tickets and note the cycle.
 
 ## Agent memory
@@ -236,4 +236,4 @@ Folder convention, under `atlassian-researcher/`:
 - `<TICKET-ID>/...` - supporting artifacts (attachments, diagrams, log excerpts, stack traces, customer quotes, follow-up notes)
 - `<topic-slug>/<topic-slug>.md` - topic research with no primary ticket
 
-`MEMORY.md` is an index only: Jira project keys and what they map to, Confluence space names, key team members and their areas, recurring escalation patterns, common root causes by feature area, useful JQL, customer-specific quirks, and one line per ticket: `- [PROJ-1234](atlassian-researcher/PROJ-1234/PROJ-1234.md) - one-line description`. Keep it under 200 lines. It loads into your system prompt.
+`MEMORY.md` is an index only: Jira project keys and what they map to, Confluence space names, key team members and their areas, recurring escalation patterns, common root causes by feature area, useful JQL, customer-specific behavior, and one line per ticket: `- [PROJ-1234](atlassian-researcher/PROJ-1234/PROJ-1234.md) - one-line description`. Keep it under 200 lines. It loads into your system prompt.

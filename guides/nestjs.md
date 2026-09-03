@@ -66,7 +66,7 @@ src/
 export class DcmRecurringReportsService { ... }
 export class DcmRecurringReportEntity { ... }
 
-// Bad — no prefix, collision risk in a monorepo
+// Bad - no prefix, collision risk in a monorepo
 export class RecurringReportsService { ... }
 ```
 
@@ -143,7 +143,7 @@ export class DcmRecurringReportsController {
 **Rules:**
 - Apply `@UsePipes(new ValidationPipe({ transform: true }))` at controller level so all endpoints validate and transform inputs.
 - Use `@CurrentUser()` and `@CurrentAccount()` parameter decorators. Never read from `request` directly.
-- Return the service promise directly; don't `await` in controllers unless you need the value.
+- Return the service promise directly. Do not `await` in controllers unless you need the value.
 - Keep route handlers to 1-3 lines. If you need more, move the logic to the service.
 - Declare `static excludedEndpointsFromGlobalPrefix` when a controller has routes outside the global prefix.
 
@@ -183,7 +183,7 @@ export class DcmContactService {
         return contact.save();
     }
 
-    // Private helper — access control check kept close to the usage
+    // Private helper - access control check kept close to the usage
     private async assertContactAccess(contact: DcmContact, user: DcmIdUser): Promise<void> {
         if (contact.accountId !== user.accountId) {
             throw new ForbiddenException('Contact does not belong to your account');
@@ -222,13 +222,13 @@ export class DcmContactCreateDto {
     phoneNumber?: string;
 }
 
-// update-contact.dto.ts — re-use create DTO, make all fields optional
+// update-contact.dto.ts - re-use create DTO, make all fields optional
 export class DcmContactUpdateDto extends DcmContactCreateDto {
     @IsOptional()
     declare name: string;   // override parent's required field
 }
 
-// list-contact.dto.ts — query params always extend shared pagination
+// list-contact.dto.ts - query params always extend shared pagination
 export class DcmContactListDto extends DcmSharedPaginationDto {
     @IsOptional()
     @IsString()
@@ -287,7 +287,7 @@ export class DcmRecurringReportEntity extends DcmAuditable {
     frequency: DcmRecurringReportFrequency;
 }
 
-// _shared/entities/auditable.ts — extend this for every entity
+// _shared/entities/auditable.ts - extend this for every entity
 export abstract class DcmAuditable extends BaseEntity {
     @CreateDateColumn({ name: 'created_at', type: 'timestamp', nullable: false })
     createdAt!: Date;
@@ -362,10 +362,10 @@ ping() { return 'ok'; }
 #### Authorization
 
 ```typescript
-// On controller — applies to all routes in this controller
+// On controller - applies to all routes in this controller
 @AuthenticatedOnly([DcmChannelType.Api, DcmChannelType.Web])
 
-// On individual route — fine-grained role/permission check
+// On individual route - fine-grained role/permission check
 @AuthorizeForUserRoles({
     roles: [DcmIdUserRole.owner, DcmIdUserRole.superadmin],
     permissions: [DcmIdPermission.RunReports],
@@ -451,7 +451,7 @@ createBulk(@Body(DcmTransformBodyToArrayPipe) bodies: DcmContactCreateDto[]) { .
 #### Use standard NestJS exceptions first
 
 ```typescript
-// Good — standard exceptions map directly to HTTP status codes
+// Good - standard exceptions map directly to HTTP status codes
 throw new NotFoundException(`Report ${uuid} not found`);
 throw new BadRequestException('Limit must be between 1 and 500');
 throw new ForbiddenException('You do not have access to this resource');
@@ -520,7 +520,7 @@ export class DcmRecurringReportsQueue extends WorkerHost {
     async process(job: Job<DcmRecurringReportEntity>): Promise<void> {
         const report = await this.reportsRepo.findOneBy({ uuid: job.data.uuid });
         if (!report) {
-            this.logger.warn(`Report ${job.data.uuid} not found — skipping`);
+            this.logger.warn(`Report ${job.data.uuid} not found - skipping`);
             return;
         }
         await this.recurringReportsService.send(report);
@@ -541,7 +541,7 @@ export class DcmRecurringReportsQueue extends WorkerHost {
 **Rules:**
 - Queue processors extend `WorkerHost` and are registered in the owning feature module.
 - Re-fetch the entity inside the processor. Job data may be stale.
-- Handle `error` and `failed` worker events explicitly; don't let failures be silent.
+- Handle `error` and `failed` worker events explicitly. Log every failure.
 - Queue name constants go in `feature-name.interfaces.ts` as `UPPER_SNAKE_CASE` exports.
 
 ## 12. Configuration

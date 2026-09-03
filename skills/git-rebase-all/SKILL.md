@@ -46,7 +46,7 @@ For each wave in order:
 1. Spawn one Agent call per MR in the wave, all in a single message.
    - **No conflicts**: server-side rebase prompt, no `isolation`.
    - **Has conflicts**: local-rebase prompt with `isolation: "worktree"`.
-2. Wait for the wave to complete before the next one. The child's parent must land on the remote first.
+2. Wait for the wave to complete before the next one. The parent's rebase must reach the remote before the child rebases.
 3. If an MR fails, mark its descendants `skipped (parent failed)` and do not spawn them. Other chains continue.
 
 Each subagent prompt must be self-contained.
@@ -56,7 +56,7 @@ Each subagent prompt must be self-contained.
 > Rebase MR !<iid> (`<sourceBranch>` → `<targetBranch>`) via GitLab server-side rebase.
 >
 > 1. `glab api --method PUT "projects/:fullpath/merge_requests/<iid>/rebase"`
-> 2. Poll every 5s, **max 60 attempts (5 minutes)**: `glab api "projects/:fullpath/merge_requests/<iid>?include_rebase_in_progress=true" | jq '{rebase_in_progress, merge_error, sha}'`. Two `glab` traps (it is not `gh`): the `--jq` flag is unsupported, pipe through `jq` instead; and `rebase_in_progress` is omitted unless `?include_rebase_in_progress=true` is in the query string (without it the field reads `null`, never `false`). Done when `rebase_in_progress` is not `true` (`false` or `null`). Failed if `merge_error` is set. **Timed out** if the cap is reached while still in progress.
+> 2. Poll every 5s, **max 60 attempts (5 minutes)**: `glab api "projects/:fullpath/merge_requests/<iid>?include_rebase_in_progress=true" | jq '{rebase_in_progress, merge_error, sha}'`. Two `glab` limits (it is not `gh`): the `--jq` flag is unsupported, so pipe through `jq`. The `rebase_in_progress` field is omitted unless `?include_rebase_in_progress=true` is in the query string (without it the field reads `null`, never `false`). Done when `rebase_in_progress` is not `true` (`false` or `null`). Failed if `merge_error` is set. **Timed out** if the cap is reached while still in progress.
 > 3. Report: rebased with the new SHA (the `sha` field), the failure reason, or `timed out after 5 minutes`.
 
 **Local rebase prompt (has conflicts):**
@@ -68,7 +68,7 @@ Each subagent prompt must be self-contained.
 > 3. Inspect `git log --oneline origin/<targetBranch>..HEAD`. If foreign commits are present (parent branch squash-merged into target):
 >    `git rebase --onto origin/<targetBranch> <first-own-commit>~1 <sourceBranch>`
 >    Otherwise: `git rebase origin/<targetBranch>`
-> 4. Resolve conflicts (read, fix, `git add`, `git rebase --continue`). If hopeless, `git rebase --abort` and report failure.
+> 4. Resolve conflicts (read, fix, `git add`, `git rebase --continue`). If the conflicts cannot be resolved, `git rebase --abort` and report failure.
 > 5. `git push --force-with-lease origin <sourceBranch>`
 >
 > Report: pushed, up to date, conflicts resolved and pushed, or the failure reason.
@@ -97,5 +97,5 @@ git worktree prune
 
 ## Rules
 
-- The subagent prompts hold the executable steps. Keep them in step with `/git-rebase`, which owns the strategy.
+- The subagent prompts hold the executable steps. Keep them consistent with `/git-rebase`, which owns the strategy.
 - Stack relationships are inferred fresh from `target_branch` every run. No persisted state.

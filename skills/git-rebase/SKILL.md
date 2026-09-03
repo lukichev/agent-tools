@@ -116,7 +116,7 @@ Same in both modes. Only the file paths differ (working directory, or `$WORKTREE
 - Keep the correct version: usually ours for our own files, theirs for files we did not touch
 - `git add <resolved-files>`, then `git rebase --continue`
 - Repeat while conflicts appear
-- If hopeless (many unrelated conflicts), `git rebase --abort` and tell the user
+- If the conflicts cannot be resolved (many unrelated conflicts), `git rebase --abort` and tell the user
 
 ### 7. Verify and Push
 
@@ -157,7 +157,7 @@ glab mr update <iid> --target-branch <target>
 | "No upstream configured" | `git push -u origin HEAD` after rebase |
 | Plain rebase has many conflicts on commits that aren't ours | Abort and use `--onto` strategy (squash-merge case) |
 | Conflicts keep recurring | Check for duplicate commits: `git log --oneline origin/<target>..HEAD` |
-| Rebase went wrong | `git rebase --abort` restores pre-rebase state |
+| Rebase failed | `git rebase --abort` restores the pre-rebase state |
 | Worktree already exists at path | `git worktree remove /tmp/rebase-<sanitized-branch> --force` then retry (replace `/` with `-` in branch name) |
 
 ## Rules

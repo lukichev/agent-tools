@@ -76,11 +76,11 @@ Split on leading path segments (`src/_nest/identity`, `apps/portal`). Each revie
 - MR number, title, author, `source_branch` → `target_branch`, state, its file subset
 - The description, labelled as the author's claims
 - **The worktree path, which is the MR state.** Read and grep there, never the primary tree, which holds another branch.
-- **Pre-change state is `git show <base_sha>:<path>`**, from `diff_refs.base_sha`. Not `main`, not `<target_branch>`: either can sit hundreds of files from the diff base.
+- **Pre-change state is `git show <base_sha>:<path>`**, from `diff_refs.base_sha`. Not `main`, not `<target_branch>`: either can differ from the diff base by hundreds of files.
 - Unresolved discussions, one line each, so it does not repeat existing feedback
 - Focus areas from what the MR touches. Call out migrations, auth, deletes, schema changes.
-- Rules: no finding from the diff alone; verify against worktree source; check whether nearby code or tests already cover it; drop false positives; run completeness greps repo-wide inside the worktree; skip non-standard style; state which author testing claims you verified and which you could not
-- Output: numbered list, each with `file:line`, a category (bug / security / performance / data-safety / testing / style), a one-line failure scenario, a one-line fix. No essays.
+- Rules: no finding from the diff alone. Verify against worktree source. Check whether nearby code or tests already cover it. Drop false positives. Run completeness greps repo-wide inside the worktree. Skip non-standard style. State which author testing claims you verified and which you could not
+- Output: numbered list, each with `file:line`, a category (bug / security / performance / data-safety / testing / style), a one-line failure scenario, a one-line fix. Nothing else.
 
 **Never pass the ticket to a reviewer.** They judge the code. The orchestrator judges it against the ACs in step 5.
 

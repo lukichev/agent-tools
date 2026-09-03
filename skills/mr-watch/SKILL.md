@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # MR Watch
 
-One tick of unattended MR maintenance: rebase what is safe, then report the delta. Built for `/loop /mr-watch`. A tick with no change must stay quiet.
+One tick of unattended MR maintenance: rebase what is safe, then report the delta. Built for `/loop /mr-watch`. A tick with no change reports `no change` and nothing else.
 
 Status logic lives in `/mr-status-check`. Rebase logic lives in `/git-rebase-all`. This skill adds the guards, the delta and the pacing.
 
@@ -18,7 +18,7 @@ Status logic lives in `/mr-status-check`. Rebase logic lives in `/git-rebase-all
 git remote get-url origin   # → <host>/<group>/<project>.git
 ```
 
-State file: `~/.claude/mr-watch/<group>-<project>.json`. Create the directory if absent. No file means the first tick: record state, report the current problems once, then keep quiet.
+State file: `~/.claude/mr-watch/<group>-<project>.json`. Create the directory if absent. No file means the first tick: record state, report the current problems once, then report only changes.
 
 ### 2. Fetch status
 

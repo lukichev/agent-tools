@@ -4,7 +4,7 @@ Reusable Claude Code agents, skills and code style guides. Project-agnostic: cop
 
 ## Usage
 
-Symlink (stays in sync) or copy the directories into your project's `.claude/` folder:
+Symlink or copy the directories into your project's `.claude/` folder. A symlink stays in sync:
 
 ```bash
 ln -s /path/to/agent-tools/agents/ /your-project/.claude/agents
@@ -22,7 +22,7 @@ ln -s /path/to/agent-tools/guides        ~/.claude/guides
 ln -s /path/to/agent-tools/output-styles ~/.claude/output-styles
 ```
 
-Point at a guide from your project's `CLAUDE.md`. Never `@import` it: an import loads the full guide (2-7k tokens) into every session. A pointer line costs nothing until the guide is read:
+Point at a guide from your project's `CLAUDE.md`. Never `@import` it: an import loads the full guide (2-7k tokens) into every session. A pointer line loads nothing until Claude reads the guide:
 
 ```markdown
 ## Code Style
@@ -36,7 +36,7 @@ Most agents and skills read the target project's `CLAUDE.md`. Document the tech 
 
 | Agent | Purpose |
 |-------|---------|
-| `code-reviewer` | Multi-lens review of a diff: bugs, security, performance, architecture, style. Run after code changes |
+| `code-reviewer` | Review of a diff: bugs, security, performance, architecture, style. Run after code changes |
 | `logic-reviewer` | Logic analysis of algorithms and business rules, or changeset review for coherence, scope and intent |
 | `session-reflector` | Recover context lost to compaction, trace decisions, flag mistakes |
 | `atlassian-researcher` | Research a ticket or topic across Jira and Confluence. Escalation mode adds history, regressions and recommendations |
